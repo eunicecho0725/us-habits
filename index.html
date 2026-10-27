@@ -1,0 +1,1042 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Us">
+<title>Mikey &amp; Euni</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  color-scheme:light;
+  --bg:#F6F4EF; --surface:#FFFFFF; --ink:#1E2420; --muted:#6B736D; --line:#E6E2D9;
+  --accent:#5E8C61; --empty:#ECE9E2; --band:rgba(94,140,97,.08);
+  --euni:#6FA77A; --mikey:#D58F58; --danger:#B4534F; --overlay:rgba(20,24,21,.45);
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --bg:#151816; --surface:#1F2320; --ink:#E8ECE8; --muted:#9AA49C; --line:#2D332F;
+    --accent:#8FBF8F; --empty:#2A2F2B; --band:rgba(143,191,143,.08);
+    --euni:#8FBF8F; --mikey:#E8A876; --danger:#E08C88; --overlay:rgba(0,0,0,.55);
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#151816; --surface:#1F2320; --ink:#E8ECE8; --muted:#9AA49C; --line:#2D332F;
+  --accent:#8FBF8F; --empty:#2A2F2B; --band:rgba(143,191,143,.08);
+  --euni:#8FBF8F; --mikey:#E8A876; --danger:#E08C88; --overlay:rgba(0,0,0,.55);
+}
+*,*::before,*::after{box-sizing:inherit}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:"Figtree",system-ui,-apple-system,"Segoe UI",sans-serif;-webkit-tap-highlight-color:transparent}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+button{font:inherit;color:inherit}
+.app{max-width:480px;margin:0 auto;padding:0 16px 40px}
+
+/* Header */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);padding:16px 0 8px}
+.titlebar{display:flex;align-items:center;justify-content:space-between;gap:8px}
+h1{font-size:1.9rem;font-weight:700;margin:0;letter-spacing:-.01em}
+.iconbtn{appearance:none;border:0;background:var(--surface);width:40px;height:40px;border-radius:12px;display:grid;place-items:center;font-size:1.3rem;cursor:pointer;border:1px solid var(--line)}
+.iconbtn.add{background:var(--accent);color:var(--bg);border-color:var(--accent);font-size:1.6rem;line-height:1}
+.chips{display:flex;gap:16px;margin-top:10px;flex-wrap:wrap}
+.legend{display:flex;align-items:center;gap:6px;font-size:.88rem;color:var(--muted);font-weight:600}
+.legend .dot{width:10px;height:10px;border-radius:50%}
+.chip{appearance:none;border:1px solid var(--line);background:var(--surface);padding:7px 14px;border-radius:999px;font-weight:600;font-size:.92rem;cursor:pointer;display:flex;align-items:center;gap:6px}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.chip .dot{width:9px;height:9px;border-radius:50%}
+.weeknav{display:flex;align-items:center;justify-content:space-between;margin-top:14px}
+.weeknav .label{font-weight:600}
+.weeknav .ctrl{display:flex;gap:6px;align-items:center}
+.pillbtn{appearance:none;border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:6px 10px;cursor:pointer;font-weight:600;font-size:.9rem}
+.weeklabel{appearance:none;border:0;background:none;font-weight:600;font-size:.92rem;color:var(--accent);cursor:pointer;padding:6px 10px}
+
+/* Shared grid */
+.grid{display:grid;grid-template-columns:repeat(7,1fr);align-items:center;column-gap:2px}
+.days{margin-top:12px;padding:8px 12px;background:var(--surface);border:1px solid var(--line);border-radius:14px}
+.day{text-align:center;font-size:.72rem;color:var(--muted);line-height:1.25;padding:2px 0;border-radius:8px}
+.day b{display:block;font-size:.95rem;color:var(--ink);font-weight:600}
+.day.today{background:var(--band)}
+.day.today,.day.today b{color:var(--accent)}
+
+/* Cards */
+.list{display:flex;flex-direction:column;margin-top:4px;overflow-x:clip}
+.slide-l{animation:slideL .28s ease-out}
+.slide-r{animation:slideR .28s ease-out}
+@keyframes slideL{from{transform:translateX(40px);opacity:.3}to{transform:none;opacity:1}}
+@keyframes slideR{from{transform:translateX(-40px);opacity:.3}to{transform:none;opacity:1}}
+.closebar{appearance:none;width:100%;border:0;background:none;padding:14px 0 2px;cursor:pointer;display:flex;justify-content:center}
+.closebar span{width:44px;height:5px;border-radius:3px;background:var(--line)}
+@media (prefers-reduced-motion:reduce){.slide-l,.slide-r{animation:none}}
+.card{padding:16px 0 14px;border-bottom:1px solid var(--line)}
+.card:last-child{border-bottom:0}
+.cardhead{appearance:none;border:0;background:none;width:100%;display:flex;align-items:center;gap:10px;padding:2px 0 8px;cursor:pointer;text-align:left}
+.emoji{font-size:1.35rem;width:30px;text-align:center}
+.hname{font-weight:700;font-size:1.05rem;flex:1}
+.target{font-size:.8rem;color:var(--muted);font-weight:500}
+.prow{padding:3px 0}
+.who{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font-size:.75rem;font-weight:700;color:var(--bg)}
+.cell{display:grid;place-items:center;position:relative;padding:3px 0}
+.cell.today{background:none}
+.circle{appearance:none;border:2px solid transparent;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;touch-action:manipulation;width:100%;max-width:48px;height:auto;aspect-ratio:1;border-radius:50%;background:var(--empty);cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:1.02rem;font-weight:700;line-height:1;color:var(--ink);padding:0;transition:transform .12s}
+.circle:active{transform:scale(.9)}
+.circle.off{background:radial-gradient(circle,var(--line) 3px,transparent 3.5px);border:2px solid transparent;color:var(--muted)}
+.circle:not(.off){border-color:color-mix(in srgb,var(--accent) 60%,transparent);background:color-mix(in srgb,var(--accent) 10%,transparent)}
+.circle[style*="background"]{border-color:transparent}
+.circle small{font-size:.62rem;font-weight:600;opacity:.75;margin-bottom:2px;letter-spacing:.02em}
+.circle.future{opacity:.35;cursor:default}
+.memo-dot{position:absolute;bottom:0;width:4px;height:4px;border-radius:50%;background:var(--muted)}
+.count{text-align:right;font-size:.85rem;font-weight:700;color:var(--muted)}
+.count.met{color:var(--accent)}
+.stats{font-size:.82rem;color:var(--muted);margin:8px 2px 0;display:flex;flex-wrap:wrap;gap:4px 12px}
+.stats span{display:inline-flex;align-items:center;gap:5px}
+.stats i{width:8px;height:8px;border-radius:50%;display:inline-block}
+.stats b.met{color:var(--accent)}
+.dpills{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-top:8px}
+.dpill{appearance:none;width:100%;aspect-ratio:1;padding:0;border-radius:50%;border:1.5px solid var(--line);background:transparent;color:var(--muted);font-weight:600;font-size:.85rem;cursor:pointer}
+.dpill[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--bg)}
+input[type=date]{display:block;width:100%;max-width:100%;min-width:0;-webkit-appearance:none;appearance:none;font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:9px 11px;margin-top:8px;text-align:left;min-height:42px}
+input[type=date]::-webkit-date-and-time-value{text-align:left}
+.sheet{overflow-x:hidden}
+
+.empty{text-align:center;color:var(--muted);padding:40px 16px;background:var(--surface);border:1px dashed var(--line);border-radius:16px;margin-top:10px}
+#banner{position:fixed;right:max(16px, calc((100vw - 480px)/2 + 16px));bottom:calc(86px + env(safe-area-inset-bottom,0px));z-index:14;pointer-events:none}
+.banner{font-size:.75rem;color:var(--muted);background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:5px 10px;box-shadow:0 4px 12px rgba(0,0,0,.12)}
+
+/* Sheets */
+.overlay{position:fixed;inset:0;background:var(--overlay);z-index:20;display:none;align-items:flex-end;justify-content:center}
+.overlay.open{display:flex}
+.sheet{background:var(--surface);width:100%;max-width:480px;max-height:88vh;overflow:auto;border-radius:20px 20px 0 0;padding:18px 18px calc(22px + env(safe-area-inset-bottom,0px))}
+.sheethead{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.sheethead h2{flex:1;margin:0;font-size:1.25rem}
+.seg{display:flex;background:var(--empty);border-radius:12px;padding:3px;gap:3px}
+.seg button{appearance:none;flex:1;border:0;background:none;padding:8px;border-radius:9px;font-weight:600;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--surface);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.sstats{font-size:.88rem;color:var(--muted);margin:12px 0 4px}
+.dayrow{border-top:1px solid var(--line);padding:12px 0}
+.dayline{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.dlabel{font-weight:600}
+.dlabel small{display:block;font-weight:500;color:var(--muted);font-size:.8rem}
+.toggle{appearance:none;border:1px solid var(--line);background:var(--bg);padding:8px 14px;border-radius:999px;font-weight:600;cursor:pointer;min-width:96px}
+.toggle.on{color:var(--bg);border-color:transparent}
+.toggle:disabled{opacity:.45;cursor:default}
+textarea,input[type=text]{width:100%;font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:9px 11px;margin-top:8px;resize:none}
+.memo-ro{margin-top:6px;font-size:.92rem;color:var(--muted);white-space:pre-wrap}
+.footer{display:flex;gap:8px;margin-top:14px}
+.btn{appearance:none;border:1px solid var(--line);background:var(--bg);padding:10px 14px;border-radius:12px;font-weight:600;cursor:pointer;flex:1}
+.btn.primary{background:var(--accent);color:var(--bg);border-color:var(--accent)}
+.btn.danger{color:var(--danger)}
+label.f{display:block;font-weight:600;font-size:.9rem;margin-top:14px}
+.stepper{display:flex;align-items:center;gap:12px;margin-top:8px}
+.stepper span{font-weight:700;font-size:1.1rem;min-width:70px;text-align:center}
+.who-big{display:flex;gap:12px;margin-top:16px}
+.who-big button{flex:1;padding:22px 10px;border-radius:16px;border:1px solid var(--line);background:var(--bg);font-weight:700;font-size:1.1rem;cursor:pointer}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+/* Day dropdown */
+.panel{position:relative;margin-top:12px;background:var(--bg);border:1px solid var(--line);border-radius:14px;padding:12px}
+.panel::before{content:"";position:absolute;top:-7px;left:var(--x,50%);width:12px;height:12px;background:var(--bg);border-left:1px solid var(--line);border-top:1px solid var(--line);transform:translateX(-50%) rotate(45deg)}
+.phead{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.phead b{font-size:1rem}
+.xbtn{appearance:none;border:0;background:none;font-size:1.2rem;color:var(--muted);cursor:pointer;padding:2px 6px}
+.status{display:flex;gap:8px}
+.status button{appearance:none;flex:1;padding:12px 10px;border-radius:999px;border:1.5px solid var(--line);background:var(--surface);font-weight:700;font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:transform .2s cubic-bezier(.34,1.56,.64,1)}
+.status button:active{transform:scale(.92)}
+.status .em{font-size:1.15rem;line-height:1}
+.pop{animation:pop .45s cubic-bezier(.34,1.56,.64,1)}
+@keyframes pop{0%{transform:scale(.82)}55%{transform:scale(1.12)}100%{transform:scale(1)}}
+.both{text-align:center;font-weight:700;padding:10px;border-radius:999px;margin-bottom:10px;background:linear-gradient(90deg,var(--euni-v),var(--mikey-v));background:linear-gradient(in oklch 90deg,var(--euni-v),var(--mikey-v));color:#16201A}
+.burst{position:absolute;top:-6px;font-size:1.1rem;pointer-events:none;animation:burst 1s ease-out forwards}
+@keyframes burst{0%{transform:translateY(0) scale(.6);opacity:0}20%{opacity:1}100%{transform:translateY(-28px) scale(1.2);opacity:0}}
+@media (prefers-reduced-motion:reduce){.pop{animation:none}.burst{display:none}}
+.status button[aria-pressed="true"]{border-color:transparent;color:#16201A}
+.status button.notdone[aria-pressed="true"]{background:var(--empty);color:var(--ink);border-color:var(--line)}
+.plabel{font-size:.78rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin:14px 0 2px}
+.partner{font-size:.9rem;margin-top:4px;display:flex;gap:8px;align-items:flex-start}
+.partner i{width:9px;height:9px;border-radius:50%;margin-top:6px;flex:none}
+.partner span{color:var(--muted)}
+.todo{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--line)}
+.todo:last-of-type{border-bottom:0}
+.tbox{appearance:none;width:22px;height:22px;border-radius:7px;border:1.5px solid var(--muted);background:none;cursor:pointer;flex:none;font-size:.8rem;font-weight:700;padding:0}
+.tbox[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--bg)}
+.ttext{flex:1;font-size:.95rem}
+.adot{width:8px;height:8px;border-radius:50%;flex:none}
+.ttext.done{text-decoration:line-through;color:var(--muted)}
+.addtodo{display:flex;gap:6px;margin-top:6px}
+.addtodo input{margin-top:0}
+.addtodo button{appearance:none;border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:0 14px;font-weight:700;cursor:pointer}
+.circle.sel{box-shadow:0 0 0 2px var(--bg),0 0 0 4px var(--ink)}
+
+
+.panel{padding:10px 12px 4px}
+.phead{margin-bottom:8px}
+.rest{color:var(--muted);font-weight:500}
+.pchip{font-size:.8rem;font-weight:700;padding:4px 10px;border-radius:999px;border:1px solid var(--line);color:var(--muted);white-space:nowrap}
+.status button{padding:9px 8px;font-size:.95rem}
+.both{padding:7px;margin-bottom:8px;font-size:.92rem}
+.notes{margin-top:6px}
+.todo{padding:5px 0}
+.addlink{appearance:none;border:0;background:none;color:var(--muted);font-weight:600;padding:10px 2px 2px;cursor:pointer;font-size:.92rem}
+.addtodo{margin-top:8px}
+.closebar{padding:10px 0 4px}
+.circle{background-origin:border-box}
+.tleft{display:flex;align-items:center;gap:2px;min-width:0}
+.tleft h1{white-space:nowrap;font-size:clamp(1.4rem,6.5vw,1.9rem)}
+.navarrow{appearance:none;border:0;background:none;font-size:1.9rem;line-height:1;color:var(--muted);padding:2px 8px 6px;cursor:pointer;border-radius:10px}
+.navarrow:first-child{margin-left:-8px}
+.navarrow:active{background:var(--surface)}
+.weeknav{justify-content:flex-start;margin-top:2px}
+.weeklabel{padding:2px 0}
+:root{--both:#E2B95A}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--both:#EAC872}}
+:root[data-theme="dark"]{--both:#EAC872}
+.dayhead{margin-top:10px;padding:4px 0 6px;border-bottom:1px solid var(--line)}
+.dh{text-align:center;font-size:.7rem;font-weight:600;color:var(--muted);line-height:1.25}
+.dh b{display:block;font-size:1rem;color:var(--ink)}
+.dh.today{color:var(--accent)}
+.dh.today b{color:var(--bg);background:var(--accent);border-radius:999px;width:28px;height:28px;line-height:28px;margin:2px auto 0}
+.streak{display:inline-flex;align-items:center;gap:1px;margin-left:8px;font-size:.78rem;font-weight:800;padding:2px 8px 2px 6px;border-radius:999px;background:rgba(232,128,48,.16);color:#D8732A;vertical-align:2px}
+.streak.hot{animation:wiggle 2.6s ease-in-out infinite}
+@keyframes wiggle{0%,80%,100%{transform:rotate(0)}85%{transform:rotate(-8deg)}90%{transform:rotate(8deg)}95%{transform:rotate(-4deg)}}
+@media (prefers-reduced-motion:reduce){.streak.hot{animation:none}}
+.tip{position:fixed;left:16px;right:16px;max-width:448px;margin:0 auto;bottom:calc(92px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);border-radius:18px;padding:14px 16px 12px;z-index:16;box-shadow:0 10px 30px rgba(0,0,0,.3);animation:pop .45s cubic-bezier(.34,1.56,.64,1)}
+.tip[hidden]{display:none}
+.tip p{margin:0 0 4px;font-size:.93rem}
+.tip button{appearance:none;margin-top:8px;width:100%;border:0;border-radius:999px;padding:10px;font-weight:700;background:var(--accent);color:var(--bg);cursor:pointer}
+.presets{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+.presets button{appearance:none;border:1px solid var(--line);background:var(--bg);border-radius:999px;padding:6px 12px;font-weight:600;font-size:.82rem;cursor:pointer;color:var(--muted)}
+.presets button:active{transform:scale(.95)}
+.app{padding-bottom:110px}
+.fab{position:fixed;right:20px;bottom:calc(20px + env(safe-area-inset-bottom,0px));width:60px;height:60px;border-radius:50%;border:0;background:var(--accent);color:var(--bg);font-size:2rem;line-height:1;box-shadow:0 6px 18px rgba(0,0,0,.25);z-index:15;cursor:pointer;transition:transform .2s cubic-bezier(.34,1.56,.64,1)}
+.fab:active{transform:scale(.9)}
+.hemoji{margin-right:.35em}
+.namerow{display:flex;gap:10px;align-items:center;margin-top:14px}
+.namerow input{margin-top:0;flex:1;min-width:0;font-size:1.05rem;padding:12px}
+.avatar{appearance:none;width:52px;height:52px;border-radius:50%;border:1.5px dashed var(--line);background:var(--bg);font-size:1.6rem;cursor:pointer;flex:none;display:grid;place-items:center;padding:0}
+.avatar .ph{font-size:1.3rem;color:var(--muted)}
+.epick{margin-top:10px;padding:8px;background:var(--bg);border:1px solid var(--line);border-radius:14px}
+.egrid{display:grid;grid-template-columns:repeat(8,1fr);gap:4px;max-height:200px;overflow-y:auto}
+.enone{grid-column:1/-1;color:var(--muted);font-size:.9rem;padding:8px}
+.epick[hidden]{display:none}
+.eopt{appearance:none;border:0;background:none;font-size:1.4rem;aspect-ratio:1;border-radius:10px;cursor:pointer;padding:0}
+.eopt[aria-pressed="true"]{background:var(--band)}
+.epick input{margin:0 0 8px;width:100%;font:inherit;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:9px 11px}
+.cardhead{cursor:default}
+.editbtn{appearance:none;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:5px 11px;cursor:pointer;font:inherit;font-size:.8rem;font-weight:600;color:var(--muted);white-space:nowrap}
+body.panel-open .app{padding-bottom:45vh}
+
+.bottombar{position:fixed;left:0;right:0;bottom:0;max-width:480px;margin:0 auto;padding:10px 16px calc(14px + env(safe-area-inset-bottom,0px));display:flex;align-items:center;justify-content:space-between;z-index:15;pointer-events:none}
+.bottombar>*{pointer-events:auto}
+.bottombar .fab{position:static}
+.tabs{display:flex;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:4px;box-shadow:0 6px 18px rgba(0,0,0,.18)}
+.tabs button{appearance:none;border:0;background:none;padding:11px 18px;border-radius:999px;font-weight:700;cursor:pointer;font-size:.95rem}
+.tabs button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.tsum{padding:14px 0 6px}
+.tsum b{font-size:1.15rem}
+.tgroup{margin-top:14px}
+.tglabel{display:flex;align-items:center;gap:10px;font-size:.72rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin:8px 0 2px}
+.tglabel::after{content:"";flex:1;height:1px;background:var(--line)}
+.trow-wrap{border-bottom:1px solid var(--line);padding:6px 0}
+.trow-wrap:last-child{border-bottom:0}
+.trow{display:flex;align-items:center;gap:12px}
+.tinfo{flex:1;min-width:0}
+.tname{font-weight:700;font-size:1.08rem}
+.tmeta{font-size:.84rem;color:var(--muted);margin-top:2px}
+.circle.big{width:54px;max-width:none;font-size:1.4rem}
+.restline{margin-top:18px;font-size:.85rem;color:var(--muted)}
+.extra{margin-top:10px;display:flex;flex-direction:column;gap:8px}
+.amt{display:flex;align-items:center;gap:8px}
+.amt input{width:110px;margin:0;font:inherit;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:9px 11px}
+.amt span{color:var(--muted);font-weight:600}
+.feel{display:flex;gap:6px}
+.feel button{appearance:none;flex:1;border:1.5px solid var(--line);background:var(--surface);border-radius:999px;padding:8px 6px;font-weight:600;font-size:.88rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:4px}
+.feel button[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.tods button{line-height:1.15;padding:8px 4px;font-size:1.1rem}
+.tods small{font-size:.72rem;font-weight:600}
+
+.tpls{display:flex;gap:6px;overflow-x:auto;margin:12px -18px 0;padding:0 18px 4px;scrollbar-width:none}
+.tpls::-webkit-scrollbar{display:none}
+.tpls button{appearance:none;flex:none;border:1px solid var(--line);background:var(--bg);border-radius:999px;padding:7px 12px;font-weight:600;font-size:.88rem;cursor:pointer;white-space:nowrap}
+.tpls button:active{transform:scale(.95)}
+.more{margin-top:16px;border-top:1px solid var(--line);padding-top:10px}
+.more summary{cursor:pointer;font-weight:600;color:var(--muted);font-size:.92rem;list-style:none}
+.more summary::-webkit-details-marker{display:none}
+.more summary::after{content:" ▾"}
+.more[open] summary::after{content:" ▴"}
+.opt{font-weight:500;color:var(--muted)}
+.more,.more label{display:block;min-width:0;max-width:100%}
+.more input{display:block;width:100%;max-width:100%;min-width:0;box-sizing:border-box;-webkit-appearance:none;appearance:none}
+.footer.sticky{position:sticky;bottom:calc(-22px - env(safe-area-inset-bottom,0px));background:var(--surface);padding:12px 0 6px;margin-top:16px}
+.btn.big{padding:14px;font-size:1.02rem;border-radius:14px}
+.linkdanger{appearance:none;border:0;background:none;color:var(--danger);font-weight:600;width:100%;padding:12px;cursor:pointer}
+
+/* ===================== iPhone (HIG) style ===================== */
+/* Semantic colors (UIKit system values), Dynamic Type default sizes, 8-pt spacing, 44-pt targets */
+:root{
+  /* system colors */
+  --sys-blue:#007AFF; --sys-green:#34C759; --sys-orange:#FF9500; --sys-red:#FF3B30; --sys-indigo:#5856D6; --sys-pink:#FF2D55; --sys-yellow:#FFCC00;
+  /* labels */
+  --label:#000000; --label-2:rgba(60,60,67,.6); --label-3:rgba(60,60,67,.3);
+  /* backgrounds (grouped) */
+  --bg-grouped:#F2F2F7; --bg-grouped-2:#FFFFFF; --bg-grouped-3:#F2F2F7;
+  /* fills */
+  --fill-1:rgba(120,120,128,.2); --fill-2:rgba(120,120,128,.16); --fill-3:rgba(118,118,128,.12); --fill-4:rgba(116,116,128,.08);
+  /* separators */
+  --separator:rgba(60,60,67,.29); --separator-opaque:#C6C6C8;
+  /* materials */
+  --material-thin:rgba(249,249,249,.7); --material-thick:rgba(242,242,247,.9);
+  /* type scale (Dynamic Type, Large default) */
+  --t-largetitle:34px; --t-title1:28px; --t-title2:22px; --t-title3:20px; --t-headline:17px; --t-body:17px; --t-callout:16px; --t-subhead:15px; --t-footnote:13px; --t-caption1:12px; --t-caption2:11px;
+  /* spacing & shape */
+  --sp-1:4px; --sp-2:8px; --sp-3:12px; --sp-4:16px; --sp-5:20px; --sp-6:24px; --tap:44px;
+  --r-list:10px; --r-control:10px; --r-button:12px; --r-sheet:14px;
+
+  /* map app tokens to HIG semantics */
+  --bg:var(--bg-grouped); --surface:var(--bg-grouped-2); --ink:var(--label); --muted:var(--label-2);
+  --line:var(--separator); --sep:var(--separator); --accent:var(--sys-blue);
+  --euni:var(--sys-green); --mikey:var(--sys-orange); --danger:var(--sys-red); --overlay:rgba(0,0,0,.2);
+  --fill:var(--fill-3); --fill2:var(--fill-4); --empty:var(--fill-3); --band:transparent;
+  --glass:var(--material-thin); --glass-strong:var(--material-thick);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --sys-blue:#0A84FF; --sys-green:#30D158; --sys-orange:#FF9F0A; --sys-red:#FF453A; --sys-indigo:#5E5CE6; --sys-pink:#FF375F; --sys-yellow:#FFD60A;
+    --label:#FFFFFF; --label-2:rgba(235,235,245,.6); --label-3:rgba(235,235,245,.3);
+    --bg-grouped:#000000; --bg-grouped-2:#1C1C1E; --bg-grouped-3:#2C2C2E;
+    --fill-1:rgba(120,120,128,.36); --fill-2:rgba(120,120,128,.32); --fill-3:rgba(118,118,128,.24); --fill-4:rgba(118,118,128,.18);
+    --separator:rgba(84,84,88,.6); --separator-opaque:#38383A;
+    --material-thin:rgba(37,37,37,.7); --material-thick:rgba(28,28,30,.9); --overlay:rgba(0,0,0,.45);
+  }
+}
+:root[data-theme="dark"]{
+  --sys-blue:#0A84FF; --sys-green:#30D158; --sys-orange:#FF9F0A; --sys-red:#FF453A; --sys-indigo:#5E5CE6; --sys-pink:#FF375F; --sys-yellow:#FFD60A;
+  --label:#FFFFFF; --label-2:rgba(235,235,245,.6); --label-3:rgba(235,235,245,.3);
+  --bg-grouped:#000000; --bg-grouped-2:#1C1C1E; --bg-grouped-3:#2C2C2E;
+  --fill-1:rgba(120,120,128,.36); --fill-2:rgba(120,120,128,.32); --fill-3:rgba(118,118,128,.24); --fill-4:rgba(118,118,128,.18);
+  --separator:rgba(84,84,88,.6); --separator-opaque:#38383A;
+  --material-thin:rgba(37,37,37,.7); --material-thick:rgba(28,28,30,.9); --overlay:rgba(0,0,0,.45);
+}
+html,body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Helvetica Neue",system-ui,sans-serif;font-size:var(--t-body);background:var(--bg);color:var(--label);-webkit-font-smoothing:antialiased}
+
+/* navigation bar: large title + material */
+.top{margin:0 -16px;padding:var(--sp-3) var(--sp-4) var(--sp-2);background:var(--glass);-webkit-backdrop-filter:saturate(180%) blur(20px);backdrop-filter:saturate(180%) blur(20px);border-bottom:.5px solid var(--separator)}
+body::before{background:var(--glass);-webkit-backdrop-filter:saturate(180%) blur(20px);backdrop-filter:saturate(180%) blur(20px)}
+h1,.tleft h1{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display",system-ui,sans-serif;font-size:var(--t-largetitle);line-height:41px;font-weight:700;letter-spacing:.01em}
+.navarrow{color:var(--accent);min-width:var(--tap);min-height:var(--tap);font-size:30px;font-weight:400;padding:0}
+.navarrow:first-child{margin-left:-14px}
+.iconbtn{background:var(--fill);border:0;border-radius:50%;width:var(--tap);height:var(--tap);font-size:20px;color:var(--accent)}
+.weeklabel{color:var(--accent);font-size:var(--t-subhead);font-weight:400}
+
+/* inset grouped list */
+.list{background:var(--surface);border-radius:var(--r-list);padding:0 var(--sp-4);margin-top:var(--sp-4)}
+.card{border-bottom:.5px solid var(--separator);padding:var(--sp-3) 0}
+.hname,.tname{font-size:var(--t-headline);font-weight:600;letter-spacing:-.02em}
+.tmeta,.stats{font-size:var(--t-footnote);color:var(--label-2)}
+.empty{background:transparent;border:0;color:var(--label-2);font-size:var(--t-subhead)}
+.tgroup{padding-top:var(--sp-2)}
+.tgroup + .tgroup{border-top:.5px solid var(--separator)}
+.tglabel{font-size:var(--t-footnote);font-weight:400;color:var(--label-2);text-transform:uppercase;letter-spacing:0;margin:var(--sp-2) 0 0}
+.tglabel::after{display:none}
+.trow-wrap{border-bottom:.5px solid var(--separator);padding:var(--sp-2) 0}
+.trow-wrap:last-child{border-bottom:0}
+
+/* week header (calendar-style) */
+.dayhead{border-bottom:0;margin-top:var(--sp-2)}
+.dh{font-size:var(--t-caption2);font-weight:600;color:var(--label-2);text-transform:uppercase}
+.dh b{font-size:var(--t-callout);font-weight:400;color:var(--label);text-transform:none}
+.dh.today{color:var(--sys-red)}
+.dh.today b{background:var(--sys-red);color:#fff;font-weight:600;border-radius:50%;width:30px;height:30px;line-height:30px;margin:2px auto 0}
+
+/* check circles */
+.circle{border:0;font-size:var(--t-callout);font-weight:700;color:#fff;min-height:var(--tap)}
+.circle:not(.off){background:var(--fill-3)}
+.circle.off{background:var(--fill-4);opacity:.5}
+.circle.sel{box-shadow:0 0 0 2px var(--surface),0 0 0 4px var(--accent)}
+.circle.big{font-size:var(--t-title3)}
+
+/* buttons: filled / tinted / gray */
+.btn,.pillbtn,.editbtn,.presets button,.tpls button,.feel button,.status button,.addtodo button,.dpill,.pchip{background:var(--fill-3);border:0;box-shadow:none;color:var(--label);font-size:var(--t-subhead)}
+.btn{border-radius:var(--r-button);min-height:var(--tap);font-size:var(--t-body)}
+.btn.primary{background:var(--accent);color:#fff;font-weight:600}
+.btn.big{border-radius:var(--r-button);min-height:50px}
+.editbtn{background:color-mix(in srgb,var(--accent) 15%,transparent);color:var(--accent);font-weight:500;font-size:var(--t-footnote)}
+.presets button,.tpls button{color:var(--accent);background:color-mix(in srgb,var(--accent) 12%,transparent);font-weight:500}
+.status button{font-weight:600;min-height:var(--tap)}
+.status button.notdone[aria-pressed="true"]{background:var(--fill-3);color:var(--label);box-shadow:inset 0 0 0 1.5px var(--separator)}
+.status button[aria-pressed="true"]:not(.notdone){color:#fff}
+.feel button[aria-pressed="true"],.dpill[aria-pressed="true"]{background:var(--accent);color:#fff}
+.dpill{font-size:var(--t-footnote);font-weight:600}
+.seg{background:var(--fill-3);border:0;border-radius:9px;padding:2px}
+.seg button{border-radius:7px;font-size:var(--t-footnote);font-weight:500}
+.seg button[aria-pressed="true"]{background:var(--bg-grouped-2);box-shadow:0 3px 8px rgba(0,0,0,.12),0 3px 1px rgba(0,0,0,.04);font-weight:600}
+.streak{background:color-mix(in srgb,var(--sys-orange) 15%,transparent);color:var(--sys-orange);border:0;font-size:var(--t-caption1);font-weight:700;padding:2px 8px}
+.pchip{color:var(--label);font-size:var(--t-caption1)}
+.pchip[style*="background"]{color:#fff}
+.both{background:linear-gradient(135deg,var(--euni),var(--mikey));color:#fff;border:0;font-weight:600;font-size:var(--t-subhead)}
+.tbox{border:1.5px solid var(--label-3);border-radius:50%}
+.tbox[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff}
+.ttext{font-size:var(--t-body)}
+textarea,input[type=text],input[type=date],input[type=search],.amt input,.epick input{background:var(--bg-grouped-2);border:0;border-radius:var(--r-control);font-size:var(--t-body);min-height:var(--tap)}
+label.f{font-size:var(--t-footnote);font-weight:400;color:var(--label-2);text-transform:uppercase;margin-top:var(--sp-5)}
+label.f input,label.f .opt{text-transform:none;color:var(--label)}
+label.f .opt{color:var(--label-3)}
+.avatar{background:var(--fill-3);border:0}
+.addlink{color:var(--accent);font-size:var(--t-subhead)}
+
+/* dropdown, sheet, tab bar */
+.panel{background:var(--bg-grouped);border:0;border-radius:var(--r-list)}
+.panel::before{background:var(--bg-grouped);border:0}
+.sheet{background:var(--glass-strong);-webkit-backdrop-filter:saturate(180%) blur(30px);backdrop-filter:saturate(180%) blur(30px);border-radius:var(--r-sheet) var(--r-sheet) 0 0}
+.sheethead h2{font-size:var(--t-headline);font-weight:600;text-align:center}
+.epick{background:var(--fill-4);border:0}
+.more{border-top:.5px solid var(--separator)}
+.more summary{font-size:var(--t-subhead);color:var(--accent)}
+.tabs{background:var(--glass);-webkit-backdrop-filter:saturate(180%) blur(20px);backdrop-filter:saturate(180%) blur(20px);border:.5px solid var(--separator);box-shadow:0 8px 24px rgba(0,0,0,.12)}
+.tabs button{font-weight:600;font-size:var(--t-footnote);min-height:var(--tap)}
+.tabs button[aria-pressed="true"]{background:var(--fill-3);color:var(--accent)}
+.fab{background:var(--accent);color:#fff;width:56px;height:56px;box-shadow:0 8px 20px color-mix(in srgb,var(--accent) 35%,transparent);font-weight:300}
+.banner{background:var(--glass);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);border:.5px solid var(--separator);font-size:var(--t-caption1)}
+.tip{background:var(--glass-strong);-webkit-backdrop-filter:saturate(180%) blur(30px);backdrop-filter:saturate(180%) blur(30px);color:var(--label);border:.5px solid var(--separator);box-shadow:0 12px 32px rgba(0,0,0,.18);font-size:var(--t-subhead)}
+.tip button{background:var(--accent);color:#fff;min-height:var(--tap);font-size:var(--t-body)}
+.linkdanger{color:var(--danger);font-size:var(--t-body);min-height:var(--tap)}
+
+/* focus: inset ring so it never gets clipped */
+input:focus,textarea:focus{outline:none;border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+/* hierarchy */
+label.f{font-size:.74rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-top:18px}
+label.f input,label.f .opt{text-transform:none;letter-spacing:0;font-size:1rem}
+label.f .opt{font-size:.74rem}
+.presets{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}
+.presets::-webkit-scrollbar{display:none}
+.presets button{padding:5px 10px;font-size:.78rem;flex:none}
+.editbtn{border:0;background:var(--empty);font-size:.75rem;padding:5px 10px;color:var(--muted)}
+.hname{font-size:1.05rem}
+.cardhead{padding-bottom:10px}
+.fab{box-shadow:0 4px 14px rgba(0,0,0,.22)}
+
+:root{--euni-v:var(--sys-green);--mikey-v:var(--sys-orange)}
+/* iPhone-style fixes */
+.list{background:none;padding:0;border-radius:0;margin-top:var(--sp-2)}
+.card:last-child,.trow-wrap:last-child{border-bottom:0}
+.circle[style*="background"]{color:#fff}
+
+/* make iPhone tokens win in dark mode too */
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:var(--bg-grouped);--surface:var(--bg-grouped-2);--ink:var(--label);--muted:var(--label-2);--line:var(--separator);--accent:var(--sys-blue);--euni:var(--sys-green);--mikey:var(--sys-orange);--danger:var(--sys-red);--empty:var(--fill-3);--band:transparent}}
+:root[data-theme="dark"]{--bg:var(--bg-grouped);--surface:var(--bg-grouped-2);--ink:var(--label);--muted:var(--label-2);--line:var(--separator);--accent:var(--sys-blue);--euni:var(--sys-green);--mikey:var(--sys-orange);--danger:var(--sys-red);--empty:var(--fill-3);--band:transparent}
+/* scheduled vs rest days */
+.circle.off{background:transparent;opacity:1}
+.circle:not(.off):not([style*="background"]){background:var(--fill-3);box-shadow:none}
+/* left-hand mode */
+body.lefty .bottombar{flex-direction:row-reverse}
+body.lefty .trow{flex-direction:row-reverse}
+body.lefty #banner{right:auto;left:max(16px, calc((100vw - 480px)/2 + 16px))}
+.toast{position:fixed;left:16px;right:16px;max-width:448px;margin:0 auto;bottom:calc(92px + env(safe-area-inset-bottom,0px));display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 10px 10px 16px;border-radius:16px;background:var(--glass-strong);-webkit-backdrop-filter:saturate(180%) blur(30px);backdrop-filter:saturate(180%) blur(30px);border:.5px solid var(--separator);box-shadow:0 10px 28px rgba(0,0,0,.18);z-index:16;font-size:var(--t-subhead);color:var(--label)}
+.toast[hidden]{display:none}
+.toast button{appearance:none;border:0;border-radius:999px;padding:8px 14px;font-weight:600;font-size:var(--t-subhead);background:color-mix(in srgb,var(--accent) 16%,transparent);color:var(--accent);cursor:pointer;white-space:nowrap}
+/* soft palette: gentle on the eyes */
+:root{--euni:oklch(70% 0.10 230);--mikey:oklch(68% 0.13 10);--euni-v:oklch(70% 0.10 230);--mikey-v:oklch(68% 0.13 10);--on-fill:#fff;--sys-blue:oklch(62% 0.12 255);--sys-red:oklch(65% 0.14 22);--sys-orange:oklch(74% 0.12 60)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--euni:oklch(80% 0.09 230);--mikey:oklch(76% 0.11 10);--euni-v:oklch(80% 0.09 230);--mikey-v:oklch(76% 0.11 10);--on-fill:rgba(0,0,0,.72);--sys-blue:oklch(72% 0.10 255);--sys-red:oklch(70% 0.12 22);--sys-orange:oklch(80% 0.10 65)}}
+:root[data-theme="dark"]{--euni:oklch(80% 0.09 230);--mikey:oklch(76% 0.11 10);--euni-v:oklch(80% 0.09 230);--mikey-v:oklch(76% 0.11 10);--on-fill:rgba(0,0,0,.72);--sys-blue:oklch(72% 0.10 255);--sys-red:oklch(70% 0.12 22);--sys-orange:oklch(80% 0.10 65)}
+:root[data-theme="light"]{--euni:oklch(70% 0.10 230);--mikey:oklch(68% 0.13 10);--euni-v:oklch(70% 0.10 230);--mikey-v:oklch(68% 0.13 10);--on-fill:#fff;--sys-blue:oklch(62% 0.12 255);--sys-red:oklch(65% 0.14 22);--sys-orange:oklch(74% 0.12 60)}
+
+.lrow{appearance:none;border:0;background:none;width:100%;display:flex;gap:10px;align-items:flex-start;text-align:left;padding:10px 0;border-bottom:.5px solid var(--separator);cursor:pointer;color:var(--label)}
+.lrow:last-child{border-bottom:0}
+.circle{position:relative}
+.nbadge{position:absolute;top:-1px;right:-1px;width:13px;height:13px;border-radius:50%;border:2.5px solid var(--bg);pointer-events:none}
+.circle.big .nbadge{top:1px;right:1px;width:15px;height:15px}
+.lrow .adot{margin-top:7px}
+.ltext{display:flex;flex-direction:column;gap:2px;min-width:0}
+.lhabit{font-size:var(--t-footnote);color:var(--label-2)}
+.lnote{font-size:var(--t-body)}
+.lnote.done{text-decoration:line-through;color:var(--label-2)}
+.tabs button{padding:11px 14px}
+.addtodo button{background:var(--accent);color:#fff;font-weight:600;padding:0 16px}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="top">
+    <div class="titlebar">
+      <div class="tleft">
+        <button class="navarrow wk" id="prevW" aria-label="Previous week">‹</button>
+        <h1 id="title">Mikey &amp; Euni</h1>
+        <button class="navarrow wk" id="nextW" aria-label="Next week">›</button>
+      </div>
+      <button class="iconbtn" id="menuBtn" aria-label="Settings">⋯</button>
+    </div>
+    <div class="chips" id="chips"></div>
+    <div class="weeknav">
+      <button class="weeklabel" id="weekLabel" aria-label="Go to this week"></button>
+    </div>
+    <div class="dayhead grid" id="dayHead"></div>
+  </div>
+  <div id="banner"></div>
+  <div class="list" id="list"></div>
+</div>
+
+<div class="toast" id="toast" role="status" hidden><span>Checked! <b>Hold</b> a circle to log more.</span><button data-act="toastdetails">Add details</button></div>
+<div class="tip" id="tip" role="status" hidden>
+  <p><b>Tap</b> a circle to check it off.</p>
+  <p><b>Hold</b> it for notes, amount, and how it felt.</p>
+  <p><b>Swipe</b> in Week view to change weeks.</p>
+  <button data-act="tipok">Got it</button>
+</div>
+<nav class="bottombar">
+  <div class="tabs"><button data-tab="today">☀️ Today</button><button data-tab="week">🗓️ Week</button><button data-tab="log">📝 Log</button></div>
+  <button class="fab" id="addBtn" aria-label="Add habit">+</button>
+</nav>
+<div class="overlay" id="ov"><div class="sheet" id="sheet" role="dialog" aria-modal="true"></div></div>
+
+<script>
+/* ===== Sync setup (step 2): paste your Firebase config and a long random room id ===== */
+const FIREBASE_CONFIG = null;   // e.g. {apiKey:"...", authDomain:"...", projectId:"...", appId:"..."}
+const ROOM_ID = "";             // e.g. "mikey-euni-7f3k9q2x..." (keep it secret)
+/* ================================================================================ */
+
+const PEOPLE = [
+  {id:"euni",  name:"Euni",  color:"var(--euni)"},
+  {id:"mikey", name:"Mikey", color:"var(--mikey)"}
+];
+const LS_DATA = "us-habits-data-v1", LS_ME = "us-habits-me";
+const DOW = ["Su","Mo","Tu","We","Th","Fr","Sa"];
+const DAYN = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+const FEELS = [{id:"easy",e:"😌",n:"Easy"},{id:"good",e:"🙂",n:"Good"},{id:"tough",e:"😮‍💨",n:"Tough"}];
+const TODS = [{id:"morning",e:"🌅",n:"Morning"},{id:"afternoon",e:"☀️",n:"Afternoon"},{id:"evening",e:"🌙",n:"Evening"},{id:"anytime",e:"✨",n:"Anytime"}];
+const feelE = id => (FEELS.find(f=>f.id===id)||{}).e||"";
+const MON = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+
+/* ---------- dates ---------- */
+const ymd = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+const parse = s => { const [y,m,d]=s.split("-").map(Number); return new Date(y,m-1,d); };
+const addDays = (d,n) => { const x=new Date(d); x.setDate(x.getDate()+n); return x; };
+const weekStart = d => { const x=new Date(d.getFullYear(),d.getMonth(),d.getDate()); x.setDate(x.getDate()-x.getDay()); return x; };
+const today = () => ymd(new Date());
+const weekDays = ws => Array.from({length:7},(_,i)=>ymd(addDays(ws,i)));
+
+/* ---------- state ---------- */
+const state = { tab:"today", mode:null, habits:{}, checks:{}, todos:{}, me:null, week:weekStart(new Date()), sel:null, editing:null };
+try { state.me = localStorage.getItem(LS_ME); state.tab = localStorage.getItem("us-habits-tab")||"today"; } catch(e){}
+
+const ck = (hid,p,date) => `${hid}_${p}_${date}`;
+const tk = (hid,date) => `${hid}_${date}`;
+const sched = h => Array.isArray(h.days)&&h.days.length ? h.days : [0,1,2,3,4,5,6];
+const isSched = (h,date) => sched(h).includes(parse(date).getDay());
+const started = (h,date) => date >= (h.start||h.created||"0000");
+const check = (hid,p,date) => state.checks[ck(hid,p,date)];
+const done = (hid,p,date) => !!(check(hid,p,date)||{}).done;
+const todoItems = (hid,date) => ((state.todos[tk(hid,date)]||{}).items)||[];
+const person = id => PEOPLE.find(p=>p.id===id);
+const esc = s => String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const uid = () => Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+
+/* ---------- stats ---------- */
+function weekCount(h,p,ws){ return weekDays(ws).filter(d=>isSched(h,d)&&done(h.id,p,d)).length; }
+function weekTarget(h){ return sched(h).length; }
+function streak(h,p){
+  let d=new Date(), n=0, guard=0;
+  if(!done(h.id,p,ymd(d))) d=addDays(d,-1);
+  while(guard++<3650){
+    const s=ymd(d); if(!started(h,s)) break;
+    if(isSched(h,s)){ if(done(h.id,p,s)) n++; else break; }
+    d=addDays(d,-1);
+  }
+  return n;
+}
+
+/* ---------- storage backends ---------- */
+let backend;
+const local = {
+  init(){ try{ const s=JSON.parse(localStorage.getItem(LS_DATA)||"null"); if(s){ state.habits=s.habits||{}; state.checks=s.checks||{}; state.todos=s.todos||{}; } }catch(e){} render(); },
+  save(){ try{ localStorage.setItem(LS_DATA, JSON.stringify({habits:state.habits,checks:state.checks,todos:state.todos})); }catch(e){} },
+  setHabit(h){ state.habits[h.id]=h; this.save(); render(); },
+  deleteHabit(id){ delete state.habits[id];
+    for(const k in state.checks) if(state.checks[k].habitId===id) delete state.checks[k];
+    for(const k in state.todos) if(state.todos[k].habitId===id) delete state.todos[k];
+    this.save(); render(); },
+  setCheck(key,val){ if(val) state.checks[key]=val; else delete state.checks[key]; this.save(); render(); },
+  setTodos(key,val){ if(val) state.todos[key]=val; else delete state.todos[key]; this.save(); render(); }
+};
+function loadScript(src){ return new Promise((res,rej)=>{ const s=document.createElement("script"); s.src=src; s.onload=res; s.onerror=rej; document.head.appendChild(s); }); }
+const remote = {
+  async init(){
+    await loadScript("https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js");
+    await loadScript("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js");
+    firebase.initializeApp(FIREBASE_CONFIG);
+    this.db = firebase.firestore();
+    const base = `rooms/${ROOM_ID}`;
+    this.H = this.db.collection(base+"/habits");
+    this.C = this.db.collection(base+"/checks");
+    this.T = this.db.collection(base+"/todos");
+    try{ await this.db.enablePersistence({synchronizeTabs:true}); }catch(e){}
+    this.cutoff = ymd(addDays(new Date(),-120));
+    this.live={checks:{},todos:{}}; this.old={checks:{},todos:{}}; this.loadedWeeks=new Set();
+    const merge = key => { state[key]={...this.old[key],...this.live[key]}; render(); };
+    this.H.onSnapshot(s=>{ const o={}; s.forEach(d=>o[d.id]=d.data()); state.habits=o; render(); });
+    this.C.where("date",">=",this.cutoff).onSnapshot(s=>{ const o={}; s.forEach(d=>o[d.id]=d.data()); this.live.checks=o; merge("checks"); });
+    this.T.where("date",">=",this.cutoff).onSnapshot(s=>{ const o={}; s.forEach(d=>o[d.id]=d.data()); this.live.todos=o; merge("todos"); });
+  },
+  async ensureWeek(ws){
+    const days=weekDays(ws); if(days[6]>=this.cutoff || this.loadedWeeks.has(days[0])) return;
+    this.loadedWeeks.add(days[0]);
+    for(const [col,key] of [[this.C,"checks"],[this.T,"todos"]]){
+      const snap=await col.where("date",">=",days[0]).where("date","<=",days[6]).get();
+      snap.forEach(d=>this.old[key][d.id]=d.data());
+      state[key]={...this.old[key],...this.live[key]};
+    }
+    render();
+  },
+  async fetchAll(){
+    const out={};
+    for(const [col,key] of [[this.H,"habits"],[this.C,"checks"],[this.T,"todos"]]){ out[key]={}; (await col.get()).forEach(d=>out[key][d.id]=d.data()); }
+    return out;
+  },
+  addMemo(h,d,item){ this.T.doc(tk(h,d)).set({habitId:h,date:d,items:firebase.firestore.FieldValue.arrayUnion(item)},{merge:true}); },
+  removeMemo(h,d,item){ this.T.doc(tk(h,d)).update({items:firebase.firestore.FieldValue.arrayRemove(item)}); },
+  setHabit(h){ this.H.doc(h.id).set(h); },
+  async deleteHabit(id){
+    const b=this.db.batch();
+    (await this.C.where("habitId","==",id).get()).forEach(d=>b.delete(d.ref));
+    (await this.T.where("habitId","==",id).get()).forEach(d=>b.delete(d.ref));
+    b.delete(this.H.doc(id)); await b.commit();
+  },
+  setCheck(key,val){ val ? this.C.doc(key).set(val) : this.C.doc(key).delete(); },
+  setTodos(key,val){ val ? this.T.doc(key).set(val) : this.T.doc(key).delete(); }
+};
+
+/* ---------- actions ---------- */
+function setDone(hid,p,date,val){
+  const hb=state.habits[hid];
+  if(val && hb && date < (hb.start||hb.created||date)) backend.setHabit({...hb,start:date});
+  const key=ck(hid,p,date), cur=state.checks[key]||{habitId:hid,person:p,date,memo:""};
+  if(val) backend.setCheck(key,{...cur,done:true});
+  else if(cur.memo) backend.setCheck(key,{...cur,done:false});
+  else backend.setCheck(key,null);
+}
+function setMemo(hid,p,date,memo){
+  const key=ck(hid,p,date), cur=state.checks[key]||{habitId:hid,person:p,date,done:false};
+  memo=memo.trim();
+  if(!memo && !cur.done) backend.setCheck(key,null); else backend.setCheck(key,{...cur,memo});
+}
+function setField(hid,p,date,k,v){ const key=ck(hid,p,date), cur=state.checks[key]; if(!cur||!cur.done) return; backend.setCheck(key,{...cur,[k]:v}); }
+function saveTodos(hid,date,items){ backend.setTodos(tk(hid,date), items.length?{habitId:hid,date,items}:null); }
+
+/* ---------- device preferences: hand & appearance ---------- */
+const HAND_KEY="us-habits-hand", THEME_KEY="us-habits-appearance";
+function handPref(){ try{ const v=localStorage.getItem(HAND_KEY); if(v) return v; }catch(e){} return state.me==="euni"?"left":"right"; }
+function themePref(){ try{ return localStorage.getItem(THEME_KEY)||"auto"; }catch(e){ return "auto"; } }
+function applyPrefs(){
+  const t=themePref(); if(t==="auto") delete document.documentElement.dataset.theme; else document.documentElement.dataset.theme=t;
+  document.body.classList.toggle("lefty", handPref()==="left");
+}
+
+/* ---------- render ---------- */
+const $ = id => document.getElementById(id);
+let deferred=false, POP=null, lastOpened=null;
+function render(){
+  const ae=document.activeElement;
+  if(ae && ae.closest && ae.closest(".panel") && (ae.tagName==="TEXTAREA"||ae.tagName==="INPUT")){ deferred=true; return; }
+  deferred=false;
+  POP=state.pop; state.pop=null;
+  applyPrefs();
+  $("chips").style.display="none";
+  $("title").textContent = state.tab==="today" ? new Date().toLocaleDateString("en-US",{weekday:"long",month:"short",day:"numeric"}) : state.tab==="log" ? "Log" : weekRange(state.week);
+  const isCur = weekStart(state.week).getTime()===weekStart(new Date()).getTime();
+  document.querySelector(".top .weeknav").style.display = state.tab==="week" && !isCur ? "" : "none";
+  document.querySelectorAll(".wk").forEach(b=>b.style.display = state.tab==="week" ? "" : "none");
+  $("dayHead").style.display = state.tab==="week" && Object.keys(state.habits).length ? "" : "none";
+  document.querySelectorAll("[data-tab]").forEach(b=>b.setAttribute("aria-pressed", b.dataset.tab===state.tab));
+  $("banner").innerHTML = FIREBASE_CONFIG ? "" : `<div class="banner">Preview: saved on this phone only</div>`;
+  const hs=Object.values(state.habits).sort((x,y)=>(x.order||0)-(y.order||0));
+  if(!hs.length) $("list").innerHTML=`<div class="empty">No habits yet.<br>Tap <b>+</b> to add one you’ll do together.</div>`;
+  else $("list").innerHTML = state.tab==="week" ? weekHTML(hs) : state.tab==="log" ? logHTML(hs) : todayHTML(hs);
+  let seen=true; try{ seen=localStorage.getItem("us-habits-tip")==="1"; }catch(e){}
+  $("tip").hidden = seen || !hs.length || !state.me;
+  const open=!!document.querySelector(".panel");
+  document.body.classList.toggle("panel-open",open);
+  if(!open) state.adding=false;
+  const key=state.sel?state.tab+state.sel.h+state.sel.d:null;
+  if(open && key!==lastOpened){ const pn=document.querySelector(".panel"); requestAnimationFrame(()=>pn.scrollIntoView({behavior:"smooth",block:"nearest"})); }
+  lastOpened=key;
+}
+
+function circleStyle(who){
+  if(who.length===1) return `background:${who[0].color};color:var(--on-fill)`;
+  if(who.length===2) return `background:linear-gradient(135deg,var(--euni-v),var(--mikey-v));background:linear-gradient(in oklch 135deg,var(--euni-v),var(--mikey-v));color:var(--on-fill)`;
+  return "";
+}
+function circleGlyph(who){ return who.length ? "✓" : ""; }
+function amountSum(h,p,ws){ return weekDays(ws).reduce((n,d)=>n+(+((check(h.id,p,d)||{}).done&&(check(h.id,p,d)||{}).amount)||0),0); }
+
+function weekRange(ws){ const days=weekDays(ws), a0=parse(days[0]), b0=parse(days[6]); return `${MON[a0.getMonth()]} ${a0.getDate()} – ${a0.getMonth()!==b0.getMonth()?MON[b0.getMonth()]+" ":""}${b0.getDate()}`; }
+function weekHTML(hs){
+  const days=weekDays(state.week), t=today();
+  const diff=Math.round((weekStart(state.week)-weekStart(new Date()))/(7*864e5));
+  $("weekLabel").textContent = diff===0 ? "" : "↩ Back to this week";
+  $("dayHead").innerHTML = days.map(d=>`<div class="dh${d===t?" today":""}">${DOW[parse(d).getDay()]}<b>${parse(d).getDate()}</b></div>`).join("");
+  return hs.map(h=>{
+    const cells = days.map(d=>{
+      const who = PEOPLE.filter(p=>done(h.id,p.id,d));
+      const fut = d>t, off = !isSched(h,d);
+      const isSel = state.sel && state.sel.h===h.id && state.sel.d===d;
+      const isPop = POP && POP.h===h.id && POP.d===d;
+      const extra = todoItems(h.id,d).length;
+      const label = who.length ? who.map(p=>p.name).join(" and ")+" did it" : (off?"rest day":"not done");
+      return `<div class="cell${d===t?" today":""}"><button class="circle${off&&!who.length?" off":""}${fut?" future":""}${isSel?" sel":""}${isPop?" pop":""}" data-h="${h.id}" data-d="${d}" ${fut?"disabled":""} style="${circleStyle(who)}" aria-label="${d}: ${label}">${circleGlyph(who)}${noteBadge(h.id,d)}</button>${isPop&&who.length===2?`<span class="burst" aria-hidden="true">🎉</span>`:""}</div>`;
+    }).join("");
+    const tgt = weekTarget(h);
+    const counts = PEOPLE.map(p=>{ const c=weekCount(h,p.id,state.week), sum=h.unit?amountSum(h,p.id,state.week):0; return `<span><i style="background:${p.color}"></i>${p.name} <b class="${c>=tgt?"met":""}">${c}/${tgt}</b>${sum?` · ${sum} ${esc(h.unit)}`:""}</span>`; }).join("");
+    const sk=streak(h,state.me||"euni");
+    const dl = sched(h).length===7 ? "Every day" : sched(h).map(i=>DOW[i]).join(" ");
+    const showPanel = state.sel && state.sel.h===h.id && days.includes(state.sel.d);
+    return `<div class="card">
+      <div class="cardhead"><span class="hname">${h.emoji?`<span class="hemoji">${esc(h.emoji)}</span>`:""}${esc(h.name)}${sk?`<span class="streak${sk>=7?" hot":""}" aria-label="${sk} day streak">🔥${sk}</span>`:""}</span><button class="target editbtn" data-edit="${h.id}" aria-label="Edit ${esc(h.name)}">${dl} ›</button></div>
+      <div class="grid">${cells}</div>
+      ${showPanel ? panel(h, state.sel.d, `${(days.indexOf(state.sel.d)+0.5)/7*100}%`) : ""}
+    </div>`;
+  }).join("");
+}
+
+function logHTML(hs){
+  const byDate={}, add=(d,e)=>(byDate[d]=byDate[d]||[]).push(e);
+  Object.values(state.todos).forEach(t=>{ const h=state.habits[t.habitId]; if(!h) return; (t.items||[]).forEach(it=>add(t.date,{h,by:it.by,text:it.text,done:it.done,d:t.date})); });
+  Object.values(state.checks).forEach(c=>{ const h=state.habits[c.habitId]; if(!h||!c.done||!c.amount) return; add(c.date,{h,by:c.person,text:`${c.amount} ${h.unit||""}`.trim(),amt:true,d:c.date}); });
+  const dates=Object.keys(byDate).sort().reverse();
+  if(!dates.length) return `<div class="empty">Memos you leave on any day will show up here.</div>`;
+  const y=ymd(addDays(new Date(),-1));
+  return dates.map(d=>{
+    const lbl = d===today()?"Today" : d===y?"Yesterday" : parse(d).toLocaleDateString("en-US",{weekday:"short",month:"short",day:"numeric"});
+    return `<div class="tgroup"><div class="tglabel" role="heading" aria-level="2"><span>${lbl}</span></div>${byDate[d].map(e=>`<button class="lrow" data-logh="${e.h.id}" data-logd="${e.d}"><i class="adot" style="background:${(person(e.by)||{}).color||"var(--muted)"}"></i><span class="ltext"><span class="lhabit">${e.h.emoji?esc(e.h.emoji)+" ":""}${esc(e.h.name)}</span><span class="lnote${e.done?" done":""}">${e.amt?"Logged ":""}${esc(e.text)}</span></span></button>`).join("")}</div>`;
+  }).join("");
+}
+function noteBadge(hid,d){
+  const items=todoItems(hid,d); if(!items.length) return "";
+  const by=[...new Set(items.map(i=>i.by))].map(person).filter(Boolean);
+  const bg = by.length>1 ? "linear-gradient(135deg,var(--euni),var(--mikey))" : (by[0]||{}).color||"var(--accent)";
+  return `<span class="nbadge" style="background:${bg}" title="Has notes"></span>`;
+}
+function todayHTML(hs){
+  const t=today(), dd=new Date();
+  const due=hs.filter(h=>started(h,t)&&isSched(h,t)), rest=hs.filter(h=>!due.includes(h));
+  const other=PEOPLE.find(p=>p.id!==state.me)||PEOPLE[1];
+  const sum = PEOPLE.map(p=>`<span><i style="background:${p.color}"></i>${p.name} <b>${due.filter(h=>done(h.id,p.id,t)).length}/${due.length}</b></span>`).join("");
+  const row = h=>{
+    const who=PEOPLE.filter(p=>done(h.id,p.id,t)), mine=check(h.id,state.me,t)||{}, oc=check(h.id,other.id,t)||{};
+    const isPop=POP&&POP.h===h.id&&POP.d===t, isSel=state.sel&&state.sel.h===h.id&&state.sel.d===t;
+    const notes=todoItems(h.id,t).length;
+    const meta=[];
+    if(mine.done && (mine.amount||mine.feel)) meta.push(`You ${mine.amount?`${mine.amount} ${esc(h.unit||"")}`:""} ${feelE(mine.feel)}`.trim());
+    meta.push(`${esc(other.name)} ${oc.done?`✓ ${feelE(oc.feel)}`:"not yet"}`.trim());
+    if(notes) meta.push(`📝 ${notes}`);
+    return `<div class="trow-wrap"><div class="trow">
+      <div class="tinfo"><div class="tname">${h.emoji?`<span class="hemoji">${esc(h.emoji)}</span>`:""}${esc(h.name)}</div></div>
+      <div class="cell"><button class="circle big${isSel?" sel":""}${isPop?" pop":""}" data-h="${h.id}" data-d="${t}" style="${circleStyle(who)}" aria-label="${esc(h.name)}${who.length?": "+who.map(p=>p.name).join(" and ")+" did it":""}">${circleGlyph(who)}${noteBadge(h.id,t)}</button>${isPop&&who.length===2?`<span class="burst" aria-hidden="true">🎉</span>`:""}</div>
+    </div>${isSel?panel(h,t,handPref()==="left"?"28px":"calc(100% - 28px)"):""}</div>`;
+  };
+  const groups = TODS.map(g=>{ const items=due.filter(h=>(h.tod||"anytime")===g.id); return items.length?`<div class="tgroup"><div class="tglabel" role="heading" aria-level="2"><span>${g.n}</span></div>${items.map(row).join("")}</div>`:""; }).join("");
+  return `${due.length?groups:`<div class="empty">Nothing scheduled today 🌿</div>`}`;
+}
+
+function panel(h,d,xpos){
+  const me=state.me, mine=check(h.id,me,d)||{}, myColor=person(me).color, dd=parse(d);
+  const other=PEOPLE.find(p=>p.id!==me), oc=check(h.id,other.id,d)||{};
+  const items=todoItems(h.id,d), pp=POP&&POP.h===h.id&&POP.d===d;
+  const x = xpos;
+  return `<div class="panel" style="--x:${x}">
+    <div class="phead">
+      <b>${DAYN[dd.getDay()]}, ${MON[dd.getMonth()]} ${dd.getDate()}${!isSched(h,d)?' <span class="rest">· rest day</span>':""}</b>
+    </div>
+    ${(mine.done&&oc.done)?`<div class="both${pp?" pop":""}">🎉 You both did it!</div>`:""}
+    ${mine.done&&h.unit?`<div class="extra">
+      <div class="amt"><input type="number" inputmode="decimal" min="0" data-amt value="${mine.amount??""}" placeholder="0"><span>${esc(h.unit)}</span></div>
+    </div>`:""}
+    ${items.length?`<div class="notes">${items.map(it=>`<div class="todo"><span class="ttext">${esc(it.text)}</span><i class="adot" title="${esc((person(it.by)||{}).name||"")}" style="background:${(person(it.by)||{}).color||"var(--muted)"}"></i><button class="xbtn" data-td="${it.id}" aria-label="Remove">×</button></div>`).join("")}</div>`:""}
+    ${state.adding
+      ? `<div class="addtodo"><input type="text" id="todoIn" maxlength="120" placeholder="Write a memo…" enterkeyhint="done"><button data-act="addtodo">Save</button></div>`
+      : `<button class="addlink" data-act="startadd">+ Add a memo</button>`}
+    <button class="closebar" data-act="pclose" aria-label="Close"><span></span></button>
+  </div>`;
+}
+
+/* ---------- sheets ---------- */
+function openSheet(html,mode){ state.mode=mode||null; $("sheet").innerHTML=html; $("ov").classList.add("open"); }
+function closeSheet(){ $("ov").classList.remove("open"); state.mode=null; state.editing=null; }
+
+const TEMPLATES=[
+ {n:"Read",e:"📚",u:"pages",t:"evening"},{n:"Run",e:"🏃",u:"km",t:"morning"},{n:"Workout",e:"💪",u:"min",t:"morning"},
+ {n:"Stretch",e:"🧘",u:"min",t:"evening"},{n:"Drink water",e:"💧",u:"glasses",t:"anytime"},{n:"German",e:"🗣️",u:"min",t:"anytime"},
+ {n:"Meal prep",e:"🍱",u:"",t:"afternoon"},{n:"Groceries",e:"🛒",u:"",t:"afternoon"},{n:"Pray",e:"🙏",u:"",t:"morning"},
+ {n:"Journal",e:"📝",u:"",t:"evening"},{n:"Piano",e:"🎹",u:"min",t:"evening"},{n:"Date night",e:"💑",u:"",t:"evening"}
+];
+let emojiManual=false;
+function habitForm(h){
+  const isNew=!h; h=h||{name:"",emoji:"",days:[0,1,2,3,4,5,6],start:today()};
+  state.editing = isNew ? null : h.id;
+  emojiManual = !!h.emoji;
+  const days=sched(h), moreOpen = !!h.unit || (h.start && h.start!==(h.created||h.start) );
+  openSheet(`
+    <div class="sheethead"><h2>${isNew?"New habit":"Edit habit"}</h2><button class="iconbtn" data-act="close" aria-label="Close">×</button></div>
+    <div class="namerow">
+      <button class="avatar" data-act="emojipick" id="fAvatar" aria-label="Choose emoji">${h.emoji?esc(h.emoji):'<span class="ph">☺︎</span>'}</button>
+      <input type="text" id="fName" maxlength="40" value="${esc(h.name)}" placeholder="What’s the habit?" enterkeyhint="done" autocomplete="off">
+    </div>
+    <input type="hidden" id="fEmoji" value="${esc(h.emoji||"")}">
+    <div class="epick" id="ePick" hidden>
+      <input type="search" id="eSearch" placeholder="Search any emoji: handshake, friends, tennis…" aria-label="Search emoji" autocomplete="off">
+      <div class="egrid" id="eGrid">${emojiButtons(EMOJIS,h.emoji)}</div>
+    </div>
+    ${isNew?`<div class="tpls" aria-label="Quick picks">${TEMPLATES.map((t,i)=>`<button data-tpl="${i}">${t.e} ${t.n}</button>`).join("")}</div>`:""}
+    <label class="f">Which days?</label>
+    <div class="presets"><button data-preset="all">Every day</button><button data-preset="weekdays">Weekdays</button><button data-preset="weekends">Weekends</button><button data-preset="none">Clear</button></div>
+    <div class="dpills">${DAYN.map((n,i)=>`<button class="dpill" data-dp="${i}" aria-pressed="${days.includes(i)}">${n[0]}${n[1]}</button>`).join("")}</div>
+    <label class="f">When?</label>
+    <div class="seg tods" style="margin-top:8px">${TODS.map(g=>`<button data-tod="${g.id}" aria-pressed="${(h.tod||"anytime")===g.id}">${g.e}<br><small>${g.n}</small></button>`).join("")}</div>
+    <details class="more"${moreOpen?" open":""}><summary>More options</summary>
+      <label class="f">Track an amount <span class="opt">(optional)</span><input type="text" id="fUnit" maxlength="16" value="${esc(h.unit||"")}" placeholder="e.g. pages, minutes, km"></label>
+      <label class="f">Start date<input type="date" id="fStart" value="${esc(h.start||h.created||today())}"></label>
+    </details>
+    <div class="footer sticky"><button class="btn primary big" data-act="save">${isNew?"Add habit":"Save changes"}</button></div>
+    ${isNew?"":`<button class="linkdanger" data-act="del">Delete habit</button>`}
+  `,"form");
+  setTimeout(()=>{ const f=$("fName"); if(isNew && f) f.focus(); },50);
+}
+function applyTemplate(t){
+  $("fName").value=t.n; setEmoji(t.e,true); emojiManual=true;
+  document.querySelectorAll("[data-tod]").forEach(b=>b.setAttribute("aria-pressed", b.dataset.tod===t.t));
+  $("fUnit").value=t.u; if(t.u) document.querySelector(".more").open=true;
+}
+function autoEmoji(name){
+  if(emojiManual) return;
+  const skip=["morning","evening","night","daily","every","the","and","with","for"];
+  const words=name.toLowerCase().split(/\s+/).filter(w=>w.length>=3&&!skip.includes(w)).reverse();
+  for(const w of words){ const c=EMOJI_DB.find(([e,k])=>k.split(" ").some(x=>x.startsWith(w))); if(c){ setEmoji(c[0],false); return; } }
+  for(const w of words){ const r=searchEmoji(w); if(r.length && r!==EMOJIS){ setEmoji(r[0],false); return; } }
+  if(!name.trim()) setEmoji("",false);
+}
+const EMOJIS=["📚","🏃","💪","🧘","🥗","🍳","🛒","💧","😴","🙏","✍️","🎹","🎤","🗣️","🧹","💰","🚶","🚴","🧠","🌱","☀️","❤️","🎨","📵"];
+const EMOJI_DB=[
+["📚","book books read reading study library"],["📖","book read reading open bible"],["✝️","bible cross faith pray church god"],["🙏","pray prayer thanks gratitude faith"],["⛪","church faith worship sunday"],
+["🏃","run running jog jogging cardio"],["🚶","walk walking steps"],["🚴","bike cycling cycle ride"],["🏊","swim swimming pool"],["💪","workout gym strength muscle lift exercise training"],["🏋️","gym weights lift workout training"],["🧘","yoga meditate meditation calm stretch"],["🤸","stretch exercise pilates"],["⛰️","hike hiking mountain nature"],["🎾","tennis sport"],["⚽","soccer football sport"],
+["🥗","salad healthy eat food vegetables diet"],["🥦","vegetables veggies healthy broccoli"],["🍎","fruit apple healthy snack"],["🍳","cook cooking breakfast meal prep egg"],["🍱","meal prep lunch bento food"],["🍲","cook soup dinner meal"],["🛒","grocery groceries shopping cart market"],["💧","water drink hydrate hydration"],["🥤","drink water juice"],["☕","coffee tea caffeine"],["🚫","no stop quit avoid"],["🍬","sugar candy sweets"],["🍷","wine alcohol drink"],
+["😴","sleep bed rest nap"],["🛏️","bed sleep early"],["⏰","alarm wake early morning time"],["🌅","morning sunrise wake"],["🌙","night evening moon sleep"],["☀️","sun sunlight outside morning"],
+["✍️","write writing journal"],["📝","journal notes write plan"],["📓","journal diary notebook"],["🧠","learn brain think study"],["🎓","study school learn class course"],["🗣️","language speak german talk"],["🇩🇪","german germany deutsch language"],["🇨🇭","swiss switzerland"],["🇰🇷","korean korea"],["💻","code coding computer work laptop"],["💼","work job career"],["🎯","goal focus target"],
+["🎹","piano music practice keys"],["🎸","guitar music practice"],["🎤","sing singing vocal voice karaoke"],["🎵","music song listen"],["🎨","art paint drawing draw design creative"],["✏️","draw sketch pencil"],["📸","photo camera picture"],["🎬","video film vlog youtube"],
+["🧹","clean cleaning tidy chores sweep"],["🧺","laundry wash clothes"],["🍽️","dishes dinner table"],["🪴","plant plants water garden"],["🌱","grow growth plant garden"],["🐶","dog walk pet"],["🐱","cat pet"],
+["💰","money save saving budget finance"],["🐷","save savings piggy bank money"],["💳","spend card budget"],["📊","track budget stats review"],
+["📵","no phone screen time digital detox"],["📱","phone screen social"],["💊","vitamins medicine pills supplements"],["🦷","teeth floss dental brush"],["🧴","skincare skin care lotion"],["🚿","shower cold shower"],["🧜","calm breathe"],
+["❤️","love heart couple date"],["💑","couple date together love"],["💌","letter love note message"],["📞","call phone family parents"],["🤗","hug kind kindness"],["🎁","gift give giving"],["🤝","help volunteer give"],["😊","smile happy mood"],["🎉","celebrate party fun"],["✨","sparkle anytime special"],["🔥","fire streak hot"],["⭐","star"],["✅","check done task todo"],
+["👥","group people team friends together community meetup"],["🧑‍🤝‍🧑","friends together group couple social"],["👨‍👩‍👧","family group parents kids"],["🤝","handshake meet together team deal network"],["🗣️","talk conversation group discuss"],
+["🏀","basketball sport activity"],["🏸","badminton sport activity"],["🎳","bowling activity"],["🧗","climb climbing bouldering activity"],["⛷️","ski skiing activity winter"],["🛹","skate activity"],["💃","dance dancing activity"],["🎮","game gaming play"],["🧩","puzzle game activity"],["🎲","board game play activity"],["🍿","movie night film"],["🗓️","plan planning schedule date"],["🧳","travel trip"],["✈️","travel flight trip"]
+];
+const EMOJI_ALL="🥇\t1st place medal\n🥈\t2nd place medal\n🥉\t3rd place medal\n🆎\tab button blood type\n🏧\tatm sign\n🅰️\ta button blood type\n🇦🇫\tafghanistan\n🇦🇱\talbania\n🇩🇿\talgeria\n🇦🇸\tamerican samoa\n🇦🇩\tandorra\n🇦🇴\tangola\n🇦🇮\tanguilla\n🇦🇶\tantarctica\n🇦🇬\tantigua & barbuda\n♒\taquarius\n🇦🇷\targentina\n♈\taries\n🇦🇲\tarmenia\n🇦🇼\taruba\n🇦🇨\tascension island\n🇦🇺\taustralia\n🇦🇹\taustria\n🇦🇿\tazerbaijan\n🔙\tback arrow\n🅱️\tb button blood type\n🇧🇸\tbahamas\n🇧🇭\tbahrain\n🇧🇩\tbangladesh\n🇧🇧\tbarbados\n🇧🇾\tbelarus\n🇧🇪\tbelgium\n🇧🇿\tbelize\n🇧🇯\tbenin\n🇧🇲\tbermuda\n🇧🇹\tbhutan\n🇧🇴\tbolivia\n🇧🇦\tbosnia & herzegovina\n🇧🇼\tbotswana\n🇧🇻\tbouvet island\n🇧🇷\tbrazil\n🇮🇴\tbritish indian ocean territory\n🇻🇬\tbritish virgin islands\n🇧🇳\tbrunei\n🇧🇬\tbulgaria\n🇧🇫\tburkina faso\n🇧🇮\tburundi\n🆑\tcl button\n🆒\tcool button\n🇰🇭\tcambodia\n🇨🇲\tcameroon\n🇨🇦\tcanada\n🇮🇨\tcanary islands\n♋\tcancer\n🇨🇻\tcape verde\n♑\tcapricorn\n🇧🇶\tcaribbean netherlands\n🇰🇾\tcayman islands\n🇨🇫\tcentral african republic\n🇪🇦\tceuta & melilla\n🇹🇩\tchad\n🇨🇱\tchile\n🇨🇳\tchina\n🇨🇽\tchristmas island\n🎄\tchristmas tree\n🇨🇵\tclipperton island\n🇨🇨\tcocos keeling islands\n🇨🇴\tcolombia\n🇰🇲\tcomoros\n🇨🇬\tcongo-brazzaville\n🇨🇩\tcongo-kinshasa\n🇨🇰\tcook islands\n🇨🇷\tcosta rica\n🇭🇷\tcroatia\n🇨🇺\tcuba\n🇨🇼\tcuraao\n🇨🇾\tcyprus\n🇨🇿\tczechia\n🇨🇮\tcte divoire\n🇩🇰\tdenmark\n🇩🇬\tdiego garcia\n🇩🇯\tdjibouti\n🇩🇲\tdominica\n🇩🇴\tdominican republic\n🔚\tend arrow\n🇪🇨\tecuador\n🇪🇬\tegypt\n🇸🇻\tel salvador\n🏴󠁧󠁢󠁥󠁮󠁧󠁿\tengland\n🇬🇶\tequatorial guinea\n🇪🇷\teritrea\n🇪🇪\testonia\n🇸🇿\teswatini\n🇪🇹\tethiopia\n🇪🇺\teuropean union\n🆓\tfree button\n🇫🇰\tfalkland islands\n🇫🇴\tfaroe islands\n🇫🇯\tfiji\n🇫🇮\tfinland\n🇫🇷\tfrance\n🇬🇫\tfrench guiana\n🇵🇫\tfrench polynesia\n🇹🇫\tfrench southern and antarctic lands\n🇬🇦\tgabon\n🇬🇲\tgambia\n♊\tgemini\n🇬🇪\tgeorgia\n🇩🇪\tgermany\n🇬🇭\tghana\n🇬🇮\tgibraltar\n🇬🇷\tgreece\n🇬🇱\tgreenland\n🇬🇩\tgrenada\n🇬🇵\tguadeloupe\n🇬🇺\tguam\n🇬🇹\tguatemala\n🇬🇬\tguernsey\n🇬🇳\tguinea\n🇬🇼\tguinea-bissau\n🇬🇾\tguyana\n🇭🇹\thaiti\n🇭🇲\theard island & mcdonald islands\n🇭🇳\thonduras\n🇭🇰\thong kong sar china\n🇭🇺\thungary\n🆔\tid button\n🇮🇸\ticeland\n🇮🇳\tindia\n🇮🇩\tindonesia\n🇮🇷\tiran\n🇮🇶\tiraq\n🇮🇪\tireland\n🇮🇲\tisle of man\n🇮🇱\tisrael\n🇮🇹\titaly\n🇯🇲\tjamaica\n🇯🇵\tjapan\n🉑\tjapanese acceptable button\n🈸\tjapanese application button\n🉐\tjapanese bargain button\n🏯\tjapanese castle\n㊗️\tjapanese congratulations button\n🈹\tjapanese discount button\n🎎\tjapanese dolls\n🈚\tjapanese free of charge button\n🈁\tjapanese here button\n🈷️\tjapanese monthly amount button\n🈵\tjapanese no vacancy button\n🈶\tjapanese not free of charge button\n🈺\tjapanese open for business button\n🈴\tjapanese passing grade button\n🏣\tjapanese post office\n🈲\tjapanese prohibited button\n🈯\tjapanese reserved button\n㊙️\tjapanese secret button\n🈂️\tjapanese service charge button\n🔰\tjapanese symbol for beginner\n🈳\tjapanese vacancy button\n🇯🇪\tjersey\n🇯🇴\tjordan\n🇰🇿\tkazakhstan\n🇰🇪\tkenya\n🇰🇮\tkiribati\n🇽🇰\tkosovo\n🇰🇼\tkuwait\n🇰🇬\tkyrgyzstan\n🇱🇦\tlaos\n🇱🇻\tlatvia\n🇱🇧\tlebanon\n♌\tleo\n🇱🇸\tlesotho\n🇱🇷\tliberia\n♎\tlibra\n🇱🇾\tlibya\n🇱🇮\tliechtenstein\n🇱🇹\tlithuania\n🇱🇺\tluxembourg\n🇲🇴\tmacao sar china\n🇲🇬\tmadagascar\n🇲🇼\tmalawi\n🇲🇾\tmalaysia\n🇲🇻\tmaldives\n🇲🇱\tmali\n🇲🇹\tmalta\n🇲🇭\tmarshall islands\n🇲🇶\tmartinique\n🇲🇷\tmauritania\n🇲🇺\tmauritius\n🇾🇹\tmayotte\n🇲🇽\tmexico\n🇫🇲\tmicronesia\n🇲🇩\tmoldova\n🇲🇨\tmonaco\n🇲🇳\tmongolia\n🇲🇪\tmontenegro\n🇲🇸\tmontserrat\n🇲🇦\tmorocco\n🇲🇿\tmozambique\n🤶\tmrs claus\n🧑‍🎄\tmx claus\n🇲🇲\tmyanmar burma\n🆕\tnew button\n🆖\tng button\n🇳🇦\tnamibia\n🇳🇷\tnauru\n🇳🇵\tnepal\n🇳🇱\tnetherlands\n🇳🇨\tnew caledonia\n🇳🇿\tnew zealand\n🇳🇮\tnicaragua\n🇳🇪\tniger\n🇳🇬\tnigeria\n🇳🇺\tniue\n🇳🇫\tnorfolk island\n🇰🇵\tnorth korea\n🇲🇰\tnorth macedonia\n🇲🇵\tnorthern mariana islands\n🇳🇴\tnorway\n🆗\tok button\n👌\tok hand\n🔛\ton arrow\n🅾️\to button blood type\n🇴🇲\toman\n⛎\tophiuchus\n🅿️\tp button\n🇵🇰\tpakistan\n🇵🇼\tpalau\n🇵🇸\tpalestinian territories\n🇵🇦\tpanama\n🇵🇬\tpapua new guinea\n🇵🇾\tparaguay\n🇵🇪\tperu\n🇵🇭\tphilippines\n♓\tpisces\n🇵🇳\tpitcairn islands\n🇵🇱\tpoland\n🇵🇹\tportugal\n🇵🇷\tpuerto rico\n🇶🇦\tqatar\n🇷🇴\tromania\n🇷🇺\trussia\n🇷🇼\trwanda\n🇷🇪\trunion\n🔜\tsoon arrow\n🆘\tsos button\n♐\tsagittarius\n🇼🇸\tsamoa\n🇸🇲\tsan marino\n🎅\tsanta claus\n🇸🇦\tsaudi arabia\n♏\tscorpio\n🏴󠁧󠁢󠁳󠁣󠁴󠁿\tscotland\n🇸🇳\tsenegal\n🇷🇸\tserbia\n🇸🇨\tseychelles\n🇸🇱\tsierra leone\n🇸🇬\tsingapore\n🇸🇽\tsint maarten\n🇸🇰\tslovakia\n🇸🇮\tslovenia\n🇸🇧\tsolomon islands\n🇸🇴\tsomalia\n🇿🇦\tsouth africa\n🇬🇸\tsouth georgia & south sandwich islands\n🇰🇷\tsouth korea\n🇸🇸\tsouth sudan\n🇪🇸\tspain\n🇱🇰\tsri lanka\n🇧🇱\tst barthlemy\n🇸🇭\tst helena ascension & tristan da cunha\n🇰🇳\tst kitts & nevis\n🇱🇨\tst lucia\n🇲🇫\tst martin\n🇵🇲\tst pierre & miquelon\n🇻🇨\tst vincent & grenadines\n🗽\tstatue of liberty\n🇸🇩\tsudan\n🇸🇷\tsuriname\n🇸🇯\tsvalbard & jan mayen\n🇸🇪\tsweden\n🇨🇭\tswitzerland\n🇸🇾\tsyria\n🇸🇹\tso tom & prncipe\n🦖\tt-rex\n🔝\ttop arrow\n🇹🇼\ttaiwan\n🇹🇯\ttajikistan\n🇹🇿\ttanzania\n♉\ttaurus\n🇹🇭\tthailand\n🇹🇱\ttimor-leste\n🇹🇬\ttogo\n🇹🇰\ttokelau\n🗼\ttokyo tower\n🇹🇴\ttonga\n🇹🇹\ttrinidad & tobago\n🇹🇦\ttristan da cunha\n🇹🇳\ttunisia\n🇹🇲\tturkmenistan\n🇹🇨\tturks & caicos islands\n🇹🇻\ttuvalu\n🇹🇷\ttrkiye\n🇺🇲\tus outlying islands\n🇻🇮\tus virgin islands\n🆙\tup button\n🇺🇬\tuganda\n🇺🇦\tukraine\n🇦🇪\tunited arab emirates\n🇬🇧\tunited kingdom\n🇺🇳\tunited nations\n🇺🇸\tunited states\n🇺🇾\turuguay\n🇺🇿\tuzbekistan\n🆚\tvs button\n🇻🇺\tvanuatu\n🇻🇦\tvatican city\n🇻🇪\tvenezuela\n🇻🇳\tvietnam\n♍\tvirgo\n🏴󠁧󠁢󠁷󠁬󠁳󠁿\twales\n🇼🇫\twallis & futuna\n🇪🇭\twestern sahara\n🇾🇪\tyemen\n💤\tzzz\n🇿🇲\tzambia\n🇿🇼\tzimbabwe\n🧮\tabacus\n🪗\taccordion\n🩹\tadhesive bandage\n🎟️\tadmission tickets\n🚡\taerial tramway\n✈️\tairplane\n🛬\tairplane arrival\n🛫\tairplane departure\n⏰\talarm clock\n⚗️\talembic\n👽\talien\n👾\talien monster\n🚑\tambulance\n🏈\tamerican football\n🏺\tamphora\n🫀\tanatomical heart\n⚓\tanchor\n💢\tanger symbol\n😠\tangry face\n👿\tangry face with horns\n😧\tanguished face\n🐜\tant\n📶\tantenna bars\n😰\tanxious face with sweat\n🚛\tarticulated lorry\n🧑‍🎨\tartist\n🎨\tartist palette\n😲\tastonished face\n🧑‍🚀\tastronaut\n⚛️\tatom symbol\n🛺\tauto rickshaw\n🚗\tautomobile\n🥑\tavocado\n🪓\taxe\n👶\tbaby\n👼\tbaby angel\n🍼\tbaby bottle\n🐤\tbaby chick\n🚼\tbaby symbol\n👇\tbackhand index pointing down\n👈\tbackhand index pointing left\n👉\tbackhand index pointing right\n👆\tbackhand index pointing up\n🎒\tbackpack\n🥓\tbacon\n🦡\tbadger\n🏸\tbadminton\n🥯\tbagel\n🛄\tbaggage claim\n🥖\tbaguette bread\n⚖️\tbalance scale\n🩰\tballet shoes\n🎈\tballoon\n🗳️\tballot box with ballot\n🍌\tbanana\n🪕\tbanjo\n🏦\tbank\n📊\tbar chart\n💈\tbarber pole\n⚾\tbaseball\n🧺\tbasket\n🏀\tbasketball\n🦇\tbat\n🛁\tbathtub\n🔋\tbattery\n🏖️\tbeach with umbrella\n😁\tbeaming face with smiling eyes\n🫘\tbeans\n🐻\tbear\n💓\tbeating heart\n🦫\tbeaver\n🛏️\tbed\n🍺\tbeer mug\n🪲\tbeetle\n🔔\tbell\n🫑\tbell pepper\n🔕\tbell with slash\n🛎️\tbellhop bell\n🍱\tbento box\n🧃\tbeverage box\n🚲\tbicycle\n👙\tbikini\n🧢\tbilled cap\n☣️\tbiohazard\n🐦\tbird\n🎂\tbirthday cake\n🦬\tbison\n🫦\tbiting lip\n🐈‍⬛\tblack cat\n⚫\tblack circle\n🏴\tblack flag\n🖤\tblack heart\n⬛\tblack large square\n◾\tblack medium-small square\n◼️\tblack medium square\n✒️\tblack nib\n▪️\tblack small square\n🔲\tblack square button\n🌼\tblossom\n🐡\tblowfish\n📘\tblue book\n🔵\tblue circle\n💙\tblue heart\n🟦\tblue square\n🫐\tblueberries\n🐗\tboar\n💣\tbomb\n🦴\tbone\n🔖\tbookmark\n📑\tbookmark tabs\n📚\tbooks\n🪃\tboomerang\n🍾\tbottle with popping cork\n💐\tbouquet\n🏹\tbow and arrow\n🥣\tbowl with spoon\n🎳\tbowling\n🥊\tboxing glove\n👦\tboy\n🧠\tbrain\n🍞\tbread\n🤱\tbreast-feeding\n🧱\tbrick\n🌉\tbridge at night\n💼\tbriefcase\n🩲\tbriefs\n🔆\tbright button\n🥦\tbroccoli\n💔\tbroken heart\n🧹\tbroom\n🟤\tbrown circle\n🤎\tbrown heart\n🟫\tbrown square\n🧋\tbubble tea\n🫧\tbubbles\n🪣\tbucket\n🐛\tbug\n🏗️\tbuilding construction\n🚅\tbullet train\n🎯\tbullseye\n🌯\tburrito\n🚌\tbus\n🚏\tbus stop\n👤\tbust in silhouette\n👥\tbusts in silhouette\n🧈\tbutter\n🦋\tbutterfly\n🌵\tcactus\n📅\tcalendar\n🤙\tcall me hand\n🐪\tcamel\n📷\tcamera\n📸\tcamera with flash\n🏕️\tcamping\n🕯️\tcandle\n🍬\tcandy\n🥫\tcanned food\n🛶\tcanoe\n🗃️\tcard file box\n📇\tcard index\n🗂️\tcard index dividers\n🎠\tcarousel horse\n🎏\tcarp streamer\n🪚\tcarpentry saw\n🥕\tcarrot\n🏰\tcastle\n🐈\tcat\n🐱\tcat face\n😹\tcat with tears of joy\n😼\tcat with wry smile\n⛓️\tchains\n🪑\tchair\n📉\tchart decreasing\n📈\tchart increasing\n💹\tchart increasing with yen\n☑️\tcheck box with check\n✔️\tcheck mark\n✅\tcheck mark button\n🧀\tcheese wedge\n🏁\tchequered flag\n🍒\tcherries\n🌸\tcherry blossom\n♟️\tchess pawn\n🌰\tchestnut\n🐔\tchicken\n🧒\tchild\n🚸\tchildren crossing\n🐿️\tchipmunk\n🍫\tchocolate bar\n🥢\tchopsticks\n⛪\tchurch\n🚬\tcigarette\n🎦\tcinema\nⓂ️\tcircled m\n🎪\tcircus tent\n🏙️\tcityscape\n🌆\tcityscape at dusk\n🗜️\tclamp\n🎬\tclapper board\n👏\tclapping hands\n🏛️\tclassical building\n🍻\tclinking beer mugs\n🥂\tclinking glasses\n📋\tclipboard\n🔃\tclockwise vertical arrows\n📕\tclosed book\n📪\tclosed mailbox with lowered flag\n📫\tclosed mailbox with raised flag\n🌂\tclosed umbrella\n☁️\tcloud\n🌩️\tcloud with lightning\n⛈️\tcloud with lightning and rain\n🌧️\tcloud with rain\n🌨️\tcloud with snow\n🤡\tclown face\n♣️\tclub suit\n👝\tclutch bag\n🧥\tcoat\n🪳\tcockroach\n🍸\tcocktail glass\n🥥\tcoconut\n⚰️\tcoffin\n🪙\tcoin\n🥶\tcold face\n💥\tcollision\n☄️\tcomet\n🧭\tcompass\n💽\tcomputer disk\n🖱️\tcomputer mouse\n🎊\tconfetti ball\n😖\tconfounded face\n😕\tconfused face\n🚧\tconstruction\n👷\tconstruction worker\n🎛️\tcontrol knobs\n🏪\tconvenience store\n🧑‍🍳\tcook\n🍚\tcooked rice\n🍪\tcookie\n🍳\tcooking\n©️\tcopyright\n🪸\tcoral\n🛋️\tcouch and lamp\n🔄\tcounterclockwise arrows button\n💑\tcouple with heart\n👨‍❤️‍👨\tcouple with heart man man\n👩‍❤️‍👨\tcouple with heart woman man\n👩‍❤️‍👩\tcouple with heart woman woman\n🐄\tcow\n🐮\tcow face\n🤠\tcowboy hat face\n🦀\tcrab\n🖍️\tcrayon\n💳\tcredit card\n🌙\tcrescent moon\n🦗\tcricket\n🏏\tcricket game\n🐊\tcrocodile\n🥐\tcroissant\n❌\tcross mark\n❎\tcross mark button\n🤞\tcrossed fingers\n🎌\tcrossed flags\n⚔️\tcrossed swords\n👑\tcrown\n🩼\tcrutch\n😿\tcrying cat\n😢\tcrying face\n🔮\tcrystal ball\n🥒\tcucumber\n🥤\tcup with straw\n🧁\tcupcake\n🥌\tcurling stone\n➰\tcurly loop\n💱\tcurrency exchange\n🍛\tcurry rice\n🍮\tcustard\n🛃\tcustoms\n🥩\tcut of meat\n🌀\tcyclone\n🗡️\tdagger\n🍡\tdango\n💨\tdashing away\n🧏‍♂️\tdeaf man\n🧏\tdeaf person\n🧏‍♀️\tdeaf woman\n🌳\tdeciduous tree\n🦌\tdeer\n🚚\tdelivery truck\n🏬\tdepartment store\n🏚️\tderelict house\n🏜️\tdesert\n🏝️\tdesert island\n🖥️\tdesktop computer\n🕵️\tdetective\n♦️\tdiamond suit\n💠\tdiamond with a dot\n🔅\tdim button\n😞\tdisappointed face\n🥸\tdisguised face\n➗\tdivide\n🤿\tdiving mask\n🪔\tdiya lamp\n💫\tdizzy\n🧬\tdna\n🦤\tdodo\n🐕\tdog\n🐶\tdog face\n💵\tdollar banknote\n🐬\tdolphin\n🚪\tdoor\n🫥\tdotted line face\n🔯\tdotted six-pointed star\n➿\tdouble curly loop\n‼️\tdouble exclamation mark\n🍩\tdoughnut\n🕊️\tdove\n↙️\tdown-left arrow\n↘️\tdown-right arrow\n⬇️\tdown arrow\n😓\tdowncast face with sweat\n🔽\tdownwards button\n🐉\tdragon\n🐲\tdragon face\n👗\tdress\n🤤\tdrooling face\n🩸\tdrop of blood\n💧\tdroplet\n🥁\tdrum\n🦆\tduck\n🥟\tdumpling\n📀\tdvd\n📧\te-mail\n🦅\teagle\n👂\tear\n🌽\tear of corn\n🦻\tear with hearing aid\n🥚\tegg\n🍆\teggplant\n✴️\teight-pointed star\n✳️\teight-spoked asterisk\n🕣\teight-thirty\n🕗\teight oclock\n⏏️\teject button\n🔌\telectric plug\n🐘\telephant\n🛗\televator\n🕦\televen-thirty\n🕚\televen oclock\n🧝\telf\n🪹\tempty nest\n😡\tenraged face\n✉️\tenvelope\n📩\tenvelope with arrow\n💶\teuro banknote\n🌲\tevergreen tree\n🐑\tewe\n⁉️\texclamation question mark\n🤯\texploding head\n😑\texpressionless face\n👁️\teye\n👁️‍🗨️\teye in speech bubble\n👀\teyes\n😘\tface blowing a kiss\n😮‍💨\tface exhaling\n🥹\tface holding back tears\n😶‍🌫️\tface in clouds\n😋\tface savoring food\n😱\tface screaming in fear\n🤮\tface vomiting\n😵\tface with crossed-out eyes\n🫤\tface with diagonal mouth\n🤭\tface with hand over mouth\n🤕\tface with head-bandage\n😷\tface with medical mask\n🧐\tface with monocle\n🫢\tface with open eyes and hand over mouth\n😮\tface with open mouth\n🫣\tface with peeking eye\n🤨\tface with raised eyebrow\n🙄\tface with rolling eyes\n😵‍💫\tface with spiral eyes\n😤\tface with steam from nose\n🤬\tface with symbols on mouth\n😂\tface with tears of joy\n🤒\tface with thermometer\n😛\tface with tongue\n😶\tface without mouth\n🏭\tfactory\n🧑‍🏭\tfactory worker\n🧚\tfairy\n🧆\tfalafel\n🍂\tfallen leaf\n👪\tfamily\n👨‍👦\tfamily man boy\n👨‍👦‍👦\tfamily man boy boy\n👨‍👧\tfamily man girl\n👨‍👧‍👦\tfamily man girl boy\n👨‍👧‍👧\tfamily man girl girl\n👨‍👨‍👦\tfamily man man boy\n👨‍👨‍👦‍👦\tfamily man man boy boy\n👨‍👨‍👧\tfamily man man girl\n👨‍👨‍👧‍👦\tfamily man man girl boy\n👨‍👨‍👧‍👧\tfamily man man girl girl\n👨‍👩‍👦\tfamily man woman boy\n👨‍👩‍👦‍👦\tfamily man woman boy boy\n👨‍👩‍👧\tfamily man woman girl\n👨‍👩‍👧‍👦\tfamily man woman girl boy\n👨‍👩‍👧‍👧\tfamily man woman girl girl\n👩‍👦\tfamily woman boy\n👩‍👦‍👦\tfamily woman boy boy\n👩‍👧\tfamily woman girl\n👩‍👧‍👦\tfamily woman girl boy\n👩‍👧‍👧\tfamily woman girl girl\n👩‍👩‍👦\tfamily woman woman boy\n👩‍👩‍👦‍👦\tfamily woman woman boy boy\n👩‍👩‍👧\tfamily woman woman girl\n👩‍👩‍👧‍👦\tfamily woman woman girl boy\n👩‍👩‍👧‍👧\tfamily woman woman girl girl\n🧑‍🌾\tfarmer\n⏩\tfast-forward button\n⏬\tfast down button\n⏪\tfast reverse button\n⏫\tfast up button\n📠\tfax machine\n😨\tfearful face\n🪶\tfeather\n♀️\tfemale sign\n🎡\tferris wheel\n⛴️\tferry\n🏑\tfield hockey\n🗄️\tfile cabinet\n📁\tfile folder\n🎞️\tfilm frames\n📽️\tfilm projector\n🔥\tfire\n🚒\tfire engine\n🧯\tfire extinguisher\n🧨\tfirecracker\n🧑‍🚒\tfirefighter\n🎆\tfireworks\n🌓\tfirst quarter moon\n🌛\tfirst quarter moon face\n🐟\tfish\n🍥\tfish cake with swirl\n🎣\tfishing pole\n🕠\tfive-thirty\n🕔\tfive oclock\n⛳\tflag in hole\n🦩\tflamingo\n🔦\tflashlight\n🥿\tflat shoe\n🫓\tflatbread\n⚜️\tfleur-de-lis\n💪\tflexed biceps\n💾\tfloppy disk\n🎴\tflower playing cards\n😳\tflushed face\n🪰\tfly\n🥏\tflying disc\n🛸\tflying saucer\n🌫️\tfog\n🌁\tfoggy\n🙏\tfolded hands\n🫕\tfondue\n🦶\tfoot\n👣\tfootprints\n🍴\tfork and knife\n🍽️\tfork and knife with plate\n🥠\tfortune cookie\n⛲\tfountain\n🖋️\tfountain pen\n🕟\tfour-thirty\n🍀\tfour leaf clover\n🕓\tfour oclock\n🦊\tfox\n🖼️\tframed picture\n🍟\tfrench fries\n🍤\tfried shrimp\n🐸\tfrog\n🐥\tfront-facing baby chick\n☹️\tfrowning face\n😦\tfrowning face with open mouth\n⛽\tfuel pump\n🌕\tfull moon\n🌝\tfull moon face\n⚱️\tfuneral urn\n🎲\tgame die\n🧄\tgarlic\n⚙️\tgear\n💎\tgem stone\n🧞\tgenie\n👻\tghost\n🦒\tgiraffe\n👧\tgirl\n🥛\tglass of milk\n👓\tglasses\n🌎\tglobe showing americas\n🌏\tglobe showing asia-australia\n🌍\tglobe showing europe-africa\n🌐\tglobe with meridians\n🧤\tgloves\n🌟\tglowing star\n🥅\tgoal net\n🐐\tgoat\n👺\tgoblin\n🥽\tgoggles\n🦍\tgorilla\n🎓\tgraduation cap\n🍇\tgrapes\n🍏\tgreen apple\n📗\tgreen book\n🟢\tgreen circle\n💚\tgreen heart\n🥗\tgreen salad\n🟩\tgreen square\n😬\tgrimacing face\n😺\tgrinning cat\n😸\tgrinning cat with smiling eyes\n😀\tgrinning face\n😃\tgrinning face with big eyes\n😄\tgrinning face with smiling eyes\n😅\tgrinning face with sweat\n😆\tgrinning squinting face\n💗\tgrowing heart\n💂\tguard\n🦮\tguide dog\n🎸\tguitar\n🍔\thamburger\n🔨\thammer\n⚒️\thammer and pick\n🛠️\thammer and wrench\n🪬\thamsa\n🐹\thamster\n🖐️\thand with fingers splayed\n🫰\thand with index finger and thumb crossed\n👜\thandbag\n🤝\thandshake\n🐣\thatching chick\n🎧\theadphone\n🪦\theadstone\n🧑‍⚕️\thealth worker\n🙉\thear-no-evil monkey\n💟\theart decoration\n❣️\theart exclamation\n🫶\theart hands\n❤️‍🔥\theart on fire\n♥️\theart suit\n💘\theart with arrow\n💝\theart with ribbon\n💲\theavy dollar sign\n🟰\theavy equals sign\n🦔\thedgehog\n🚁\thelicopter\n🌿\therb\n🌺\thibiscus\n👠\thigh-heeled shoe\n🚄\thigh-speed train\n⚡\thigh voltage\n🥾\thiking boot\n🛕\thindu temple\n🦛\thippopotamus\n🕳️\thole\n⭕\thollow red circle\n🍯\thoney pot\n🐝\thoneybee\n🪝\thook\n🚥\thorizontal traffic light\n🐎\thorse\n🐴\thorse face\n🏇\thorse racing\n🏥\thospital\n☕\thot beverage\n🌭\thot dog\n🥵\thot face\n🌶️\thot pepper\n♨️\thot springs\n🏨\thotel\n⌛\thourglass done\n⏳\thourglass not done\n🏠\thouse\n🏡\thouse with garden\n🏘️\thouses\n💯\thundred points\n😯\thushed face\n🛖\thut\n🧊\tice\n🍨\tice cream\n🏒\tice hockey\n⛸️\tice skate\n🪪\tidentification card\n📥\tinbox tray\n📨\tincoming envelope\n🫵\tindex pointing at the viewer\n☝️\tindex pointing up\n♾️\tinfinity\nℹ️\tinformation\n🔤\tinput latin letters\n🔡\tinput latin lowercase\n🔠\tinput latin uppercase\n🔢\tinput numbers\n🔣\tinput symbols\n🎃\tjack-o-lantern\n🫙\tjar\n👖\tjeans\n🃏\tjoker\n🕹️\tjoystick\n🧑‍⚖️\tjudge\n🕋\tkaaba\n🦘\tkangaroo\n🔑\tkey\n⌨️\tkeyboard\n#️⃣\tkeycap \n*️⃣\tkeycap \n0️⃣\tkeycap 0\n1️⃣\tkeycap 1\n🔟\tkeycap 10\n2️⃣\tkeycap 2\n3️⃣\tkeycap 3\n4️⃣\tkeycap 4\n5️⃣\tkeycap 5\n6️⃣\tkeycap 6\n7️⃣\tkeycap 7\n8️⃣\tkeycap 8\n9️⃣\tkeycap 9\n🛴\tkick scooter\n👘\tkimono\n💏\tkiss\n👨‍❤️‍💋‍👨\tkiss man man\n💋\tkiss mark\n👩‍❤️‍💋‍👨\tkiss woman man\n👩‍❤️‍💋‍👩\tkiss woman woman\n😽\tkissing cat\n😗\tkissing face\n😚\tkissing face with closed eyes\n😙\tkissing face with smiling eyes\n🔪\tkitchen knife\n🪁\tkite\n🥝\tkiwi fruit\n🪢\tknot\n🐨\tkoala\n🥼\tlab coat\n🏷️\tlabel\n🥍\tlacrosse\n🪜\tladder\n🐞\tlady beetle\n💻\tlaptop\n🔷\tlarge blue diamond\n🔶\tlarge orange diamond\n🌗\tlast quarter moon\n🌜\tlast quarter moon face\n⏮️\tlast track button\n✝️\tlatin cross\n🍃\tleaf fluttering in wind\n🥬\tleafy green\n📒\tledger\n🤛\tleft-facing fist\n↔️\tleft-right arrow\n⬅️\tleft arrow\n↪️\tleft arrow curving right\n🛅\tleft luggage\n🗨️\tleft speech bubble\n🫲\tleftwards hand\n🦵\tleg\n🍋\tlemon\n🐆\tleopard\n🎚️\tlevel slider\n💡\tlight bulb\n🚈\tlight rail\n🔗\tlink\n🖇️\tlinked paperclips\n🦁\tlion\n💄\tlipstick\n🚮\tlitter in bin sign\n🦎\tlizard\n🦙\tllama\n🦞\tlobster\n🔒\tlocked\n🔐\tlocked with key\n🔏\tlocked with pen\n🚂\tlocomotive\n🍭\tlollipop\n🪘\tlong drum\n🧴\tlotion bottle\n🪷\tlotus\n😭\tloudly crying face\n📢\tloudspeaker\n🤟\tlove-you gesture\n🏩\tlove hotel\n💌\tlove letter\n🪫\tlow battery\n🧳\tluggage\n🫁\tlungs\n🤥\tlying face\n🧙\tmage\n🪄\tmagic wand\n🧲\tmagnet\n🔍\tmagnifying glass tilted left\n🔎\tmagnifying glass tilted right\n🀄\tmahjong red dragon\n♂️\tmale sign\n🦣\tmammoth\n👨\tman\n👨‍🎨\tman artist\n👨‍🚀\tman astronaut\n👨‍🦲\tman bald\n🧔‍♂️\tman beard\n🚴‍♂️\tman biking\n👱‍♂️\tman blond hair\n⛹️‍♂️\tman bouncing ball\n🙇‍♂️\tman bowing\n🤸‍♂️\tman cartwheeling\n🧗‍♂️\tman climbing\n👷‍♂️\tman construction worker\n👨‍🍳\tman cook\n👨‍🦱\tman curly hair\n🕺\tman dancing\n🕵️‍♂️\tman detective\n🧝‍♂️\tman elf\n🤦‍♂️\tman facepalming\n👨‍🏭\tman factory worker\n🧚‍♂️\tman fairy\n👨‍🌾\tman farmer\n👨‍🍼\tman feeding baby\n👨‍🚒\tman firefighter\n🙍‍♂️\tman frowning\n🧞‍♂️\tman genie\n🙅‍♂️\tman gesturing no\n🙆‍♂️\tman gesturing ok\n💇‍♂️\tman getting haircut\n💆‍♂️\tman getting massage\n🏌️‍♂️\tman golfing\n💂‍♂️\tman guard\n👨‍⚕️\tman health worker\n🧘‍♂️\tman in lotus position\n👨‍🦽\tman in manual wheelchair\n👨‍🦼\tman in motorized wheelchair\n🧖‍♂️\tman in steamy room\n🤵‍♂️\tman in tuxedo\n👨‍⚖️\tman judge\n🤹‍♂️\tman juggling\n🧎‍♂️\tman kneeling\n🏋️‍♂️\tman lifting weights\n🧙‍♂️\tman mage\n👨‍🔧\tman mechanic\n🚵‍♂️\tman mountain biking\n👨‍💼\tman office worker\n👨‍✈️\tman pilot\n🤾‍♂️\tman playing handball\n🤽‍♂️\tman playing water polo\n👮‍♂️\tman police officer\n🙎‍♂️\tman pouting\n🙋‍♂️\tman raising hand\n👨‍🦰\tman red hair\n🚣‍♂️\tman rowing boat\n🏃‍♂️\tman running\n👨‍🔬\tman scientist\n🤷‍♂️\tman shrugging\n👨‍🎤\tman singer\n🧍‍♂️\tman standing\n👨‍🎓\tman student\n🦸‍♂️\tman superhero\n🦹‍♂️\tman supervillain\n🏄‍♂️\tman surfing\n🏊‍♂️\tman swimming\n👨‍🏫\tman teacher\n👨‍💻\tman technologist\n💁‍♂️\tman tipping hand\n🧛‍♂️\tman vampire\n🚶‍♂️\tman walking\n👳‍♂️\tman wearing turban\n👨‍🦳\tman white hair\n👰‍♂️\tman with veil\n👨‍🦯\tman with white cane\n🧟‍♂️\tman zombie\n🥭\tmango\n🕰️\tmantelpiece clock\n🦽\tmanual wheelchair\n👞\tmans shoe\n🗾\tmap of japan\n🍁\tmaple leaf\n🥋\tmartial arts uniform\n🧉\tmate\n🍖\tmeat on bone\n🧑‍🔧\tmechanic\n🦾\tmechanical arm\n🦿\tmechanical leg\n⚕️\tmedical symbol\n📣\tmegaphone\n🍈\tmelon\n🫠\tmelting face\n📝\tmemo\n👬\tmen holding hands\n👯‍♂️\tmen with bunny ears\n🤼‍♂️\tmen wrestling\n❤️‍🩹\tmending heart\n🕎\tmenorah\n🚹\tmens room\n🧜‍♀️\tmermaid\n🧜‍♂️\tmerman\n🧜\tmerperson\n🚇\tmetro\n🦠\tmicrobe\n🎤\tmicrophone\n🔬\tmicroscope\n🖕\tmiddle finger\n🪖\tmilitary helmet\n🎖️\tmilitary medal\n🌌\tmilky way\n🚐\tminibus\n➖\tminus\n🪞\tmirror\n🪩\tmirror ball\n🗿\tmoai\n📱\tmobile phone\n📴\tmobile phone off\n📲\tmobile phone with arrow\n🤑\tmoney-mouth face\n💰\tmoney bag\n💸\tmoney with wings\n🐒\tmonkey\n🐵\tmonkey face\n🚝\tmonorail\n🥮\tmoon cake\n🎑\tmoon viewing ceremony\n🕌\tmosque\n🦟\tmosquito\n🛥️\tmotor boat\n🛵\tmotor scooter\n🏍️\tmotorcycle\n🦼\tmotorized wheelchair\n🛣️\tmotorway\n🗻\tmount fuji\n⛰️\tmountain\n🚠\tmountain cableway\n🚞\tmountain railway\n🐁\tmouse\n🐭\tmouse face\n🪤\tmouse trap\n👄\tmouth\n🎥\tmovie camera\n✖️\tmultiply\n🍄\tmushroom\n🎹\tmusical keyboard\n🎵\tmusical note\n🎶\tmusical notes\n🎼\tmusical score\n🔇\tmuted speaker\n💅\tnail polish\n📛\tname badge\n🏞️\tnational park\n🤢\tnauseated face\n🧿\tnazar amulet\n👔\tnecktie\n🤓\tnerd face\n🪺\tnest with eggs\n🪆\tnesting dolls\n😐\tneutral face\n🌑\tnew moon\n🌚\tnew moon face\n📰\tnewspaper\n⏭️\tnext track button\n🌃\tnight with stars\n🕤\tnine-thirty\n🕘\tnine oclock\n🥷\tninja\n🚳\tno bicycles\n⛔\tno entry\n🚯\tno littering\n📵\tno mobile phones\n🔞\tno one under eighteen\n🚷\tno pedestrians\n🚭\tno smoking\n🚱\tnon-potable water\n👃\tnose\n📓\tnotebook\n📔\tnotebook with decorative cover\n🔩\tnut and bolt\n🐙\toctopus\n🍢\toden\n🏢\toffice building\n🧑‍💼\toffice worker\n👹\togre\n🛢️\toil drum\n🗝️\told key\n👴\told man\n👵\told woman\n🧓\tolder person\n🫒\tolive\n🕉️\tom\n🚘\toncoming automobile\n🚍\toncoming bus\n👊\toncoming fist\n🚔\toncoming police car\n🚖\toncoming taxi\n🩱\tone-piece swimsuit\n🕜\tone-thirty\n🕐\tone oclock\n🧅\tonion\n📖\topen book\n📂\topen file folder\n👐\topen hands\n📭\topen mailbox with lowered flag\n📬\topen mailbox with raised flag\n💿\toptical disk\n📙\torange book\n🟠\torange circle\n🧡\torange heart\n🟧\torange square\n🦧\torangutan\n☦️\torthodox cross\n🦦\totter\n📤\toutbox tray\n🦉\towl\n🐂\tox\n🦪\toyster\n📦\tpackage\n📄\tpage facing up\n📃\tpage with curl\n📟\tpager\n🖌️\tpaintbrush\n🫳\tpalm down hand\n🌴\tpalm tree\n🫴\tpalm up hand\n🤲\tpalms up together\n🥞\tpancakes\n🐼\tpanda\n📎\tpaperclip\n🪂\tparachute\n🦜\tparrot\n〽️\tpart alternation mark\n🎉\tparty popper\n🥳\tpartying face\n🛳️\tpassenger ship\n🛂\tpassport control\n⏸️\tpause button\n🐾\tpaw prints\n☮️\tpeace symbol\n🍑\tpeach\n🦚\tpeacock\n🥜\tpeanuts\n🍐\tpear\n🖊️\tpen\n✏️\tpencil\n🐧\tpenguin\n😔\tpensive face\n🧑‍🤝‍🧑\tpeople holding hands\n🫂\tpeople hugging\n👯\tpeople with bunny ears\n🤼\tpeople wrestling\n🎭\tperforming arts\n😣\tpersevering face\n🧑\tperson\n🧑‍🦲\tperson bald\n🧔\tperson beard\n🚴\tperson biking\n👱\tperson blond hair\n⛹️\tperson bouncing ball\n🙇\tperson bowing\n🤸\tperson cartwheeling\n🧗\tperson climbing\n🧑‍🦱\tperson curly hair\n🤦\tperson facepalming\n🧑‍🍼\tperson feeding baby\n🤺\tperson fencing\n🙍\tperson frowning\n🙅\tperson gesturing no\n🙆\tperson gesturing ok\n💇\tperson getting haircut\n💆\tperson getting massage\n🏌️\tperson golfing\n🛌\tperson in bed\n🧘\tperson in lotus position\n🧑‍🦽\tperson in manual wheelchair\n🧑‍🦼\tperson in motorized wheelchair\n🧖\tperson in steamy room\n🕴️\tperson in suit levitating\n🤵\tperson in tuxedo\n🤹\tperson juggling\n🧎\tperson kneeling\n🏋️\tperson lifting weights\n🚵\tperson mountain biking\n🤾\tperson playing handball\n🤽\tperson playing water polo\n🙎\tperson pouting\n🙋\tperson raising hand\n🧑‍🦰\tperson red hair\n🚣\tperson rowing boat\n🏃\tperson running\n🤷\tperson shrugging\n🧍\tperson standing\n🏄\tperson surfing\n🏊\tperson swimming\n🛀\tperson taking bath\n💁\tperson tipping hand\n🚶\tperson walking\n👳\tperson wearing turban\n🧑‍🦳\tperson white hair\n🫅\tperson with crown\n👲\tperson with skullcap\n👰\tperson with veil\n🧑‍🦯\tperson with white cane\n🧫\tpetri dish\n⛏️\tpick\n🛻\tpickup truck\n🥧\tpie\n🐖\tpig\n🐷\tpig face\n🐽\tpig nose\n💩\tpile of poo\n💊\tpill\n🧑‍✈️\tpilot\n🤌\tpinched fingers\n🤏\tpinching hand\n🎍\tpine decoration\n🍍\tpineapple\n🏓\tping pong\n🏴‍☠️\tpirate flag\n🍕\tpizza\n🪅\tpiata\n🪧\tplacard\n🛐\tplace of worship\n▶️\tplay button\n⏯️\tplay or pause button\n🛝\tplayground slide\n🥺\tpleading face\n🪠\tplunger\n➕\tplus\n🐻‍❄️\tpolar bear\n🚓\tpolice car\n🚨\tpolice car light\n👮\tpolice officer\n🐩\tpoodle\n🎱\tpool 8 ball\n🍿\tpopcorn\n🏤\tpost office\n📯\tpostal horn\n📮\tpostbox\n🍲\tpot of food\n🚰\tpotable water\n🥔\tpotato\n🪴\tpotted plant\n🍗\tpoultry leg\n💷\tpound banknote\n🫗\tpouring liquid\n😾\tpouting cat\n📿\tprayer beads\n🫃\tpregnant man\n🫄\tpregnant person\n🤰\tpregnant woman\n🥨\tpretzel\n🤴\tprince\n👸\tprincess\n🖨️\tprinter\n🚫\tprohibited\n🟣\tpurple circle\n💜\tpurple heart\n🟪\tpurple square\n👛\tpurse\n📌\tpushpin\n🧩\tpuzzle piece\n🐇\trabbit\n🐰\trabbit face\n🦝\traccoon\n🏎️\tracing car\n📻\tradio\n🔘\tradio button\n☢️\tradioactive\n🚃\trailway car\n🛤️\trailway track\n🌈\trainbow\n🏳️‍🌈\trainbow flag\n🤚\traised back of hand\n✊\traised fist\n✋\traised hand\n🙌\traising hands\n🐏\tram\n🐀\trat\n🪒\trazor\n🧾\treceipt\n⏺️\trecord button\n♻️\trecycling symbol\n🍎\tred apple\n🔴\tred circle\n🧧\tred envelope\n❗\tred exclamation mark\n❤️\tred heart\n🏮\tred paper lantern\n❓\tred question mark\n🟥\tred square\n🔻\tred triangle pointed down\n🔺\tred triangle pointed up\n®️\tregistered\n😌\trelieved face\n🎗️\treminder ribbon\n🔁\trepeat button\n🔂\trepeat single button\n⛑️\trescue workers helmet\n🚻\trestroom\n◀️\treverse button\n💞\trevolving hearts\n🦏\trhinoceros\n🎀\tribbon\n🍙\trice ball\n🍘\trice cracker\n🤜\tright-facing fist\n🗯️\tright anger bubble\n➡️\tright arrow\n⤵️\tright arrow curving down\n↩️\tright arrow curving left\n⤴️\tright arrow curving up\n🫱\trightwards hand\n💍\tring\n🛟\tring buoy\n🪐\tringed planet\n🍠\troasted sweet potato\n🤖\trobot\n🪨\trock\n🚀\trocket\n🧻\troll of paper\n🗞️\trolled-up newspaper\n🎢\troller coaster\n🛼\troller skate\n🤣\trolling on the floor laughing\n🐓\trooster\n🌹\trose\n🏵️\trosette\n📍\tround pushpin\n🏉\trugby football\n🎽\trunning shirt\n👟\trunning shoe\n😥\tsad but relieved face\n🧷\tsafety pin\n🦺\tsafety vest\n⛵\tsailboat\n🍶\tsake\n🧂\tsalt\n🫡\tsaluting face\n🥪\tsandwich\n🥻\tsari\n🛰️\tsatellite\n📡\tsatellite antenna\n🦕\tsauropod\n🎷\tsaxophone\n🧣\tscarf\n🏫\tschool\n🧑‍🔬\tscientist\n✂️\tscissors\n🦂\tscorpion\n🪛\tscrewdriver\n📜\tscroll\n🦭\tseal\n💺\tseat\n🙈\tsee-no-evil monkey\n🌱\tseedling\n🤳\tselfie\n🐕‍🦺\tservice dog\n🕢\tseven-thirty\n🕖\tseven oclock\n🪡\tsewing needle\n🥘\tshallow pan of food\n☘️\tshamrock\n🦈\tshark\n🍧\tshaved ice\n🌾\tsheaf of rice\n🛡️\tshield\n⛩️\tshinto shrine\n🚢\tship\n🌠\tshooting star\n🛍️\tshopping bags\n🛒\tshopping cart\n🍰\tshortcake\n🩳\tshorts\n🚿\tshower\n🦐\tshrimp\n🔀\tshuffle tracks button\n🤫\tshushing face\n🤘\tsign of the horns\n🧑‍🎤\tsinger\n🕡\tsix-thirty\n🕕\tsix oclock\n🛹\tskateboard\n⛷️\tskier\n🎿\tskis\n💀\tskull\n☠️\tskull and crossbones\n🦨\tskunk\n🛷\tsled\n😴\tsleeping face\n😪\tsleepy face\n🙁\tslightly frowning face\n🙂\tslightly smiling face\n🎰\tslot machine\n🦥\tsloth\n🛩️\tsmall airplane\n🔹\tsmall blue diamond\n🔸\tsmall orange diamond\n😻\tsmiling cat with heart-eyes\n☺️\tsmiling face\n😇\tsmiling face with halo\n😍\tsmiling face with heart-eyes\n🥰\tsmiling face with hearts\n😈\tsmiling face with horns\n🤗\tsmiling face with open hands\n😊\tsmiling face with smiling eyes\n😎\tsmiling face with sunglasses\n🥲\tsmiling face with tear\n😏\tsmirking face\n🐌\tsnail\n🐍\tsnake\n🤧\tsneezing face\n🏔️\tsnow-capped mountain\n🏂\tsnowboarder\n❄️\tsnowflake\n☃️\tsnowman\n⛄\tsnowman without snow\n🧼\tsoap\n⚽\tsoccer ball\n🧦\tsocks\n🍦\tsoft ice cream\n🥎\tsoftball\n♠️\tspade suit\n🍝\tspaghetti\n❇️\tsparkle\n🎇\tsparkler\n✨\tsparkles\n💖\tsparkling heart\n🙊\tspeak-no-evil monkey\n🔊\tspeaker high volume\n🔈\tspeaker low volume\n🔉\tspeaker medium volume\n🗣️\tspeaking head\n💬\tspeech balloon\n🚤\tspeedboat\n🕷️\tspider\n🕸️\tspider web\n🗓️\tspiral calendar\n🗒️\tspiral notepad\n🐚\tspiral shell\n🧽\tsponge\n🥄\tspoon\n🚙\tsport utility vehicle\n🏅\tsports medal\n🐳\tspouting whale\n🦑\tsquid\n😝\tsquinting face with tongue\n🏟️\tstadium\n⭐\tstar\n🤩\tstar-struck\n☪️\tstar and crescent\n✡️\tstar of david\n🚉\tstation\n🍜\tsteaming bowl\n🩺\tstethoscope\n⏹️\tstop button\n🛑\tstop sign\n⏱️\tstopwatch\n📏\tstraight ruler\n🍓\tstrawberry\n🧑‍🎓\tstudent\n🎙️\tstudio microphone\n🥙\tstuffed flatbread\n☀️\tsun\n⛅\tsun behind cloud\n🌥️\tsun behind large cloud\n🌦️\tsun behind rain cloud\n🌤️\tsun behind small cloud\n🌞\tsun with face\n🌻\tsunflower\n🕶️\tsunglasses\n🌅\tsunrise\n🌄\tsunrise over mountains\n🌇\tsunset\n🦸\tsuperhero\n🦹\tsupervillain\n🍣\tsushi\n🚟\tsuspension railway\n🦢\tswan\n💦\tsweat droplets\n🕍\tsynagogue\n💉\tsyringe\n👕\tt-shirt\n🌮\ttaco\n🥡\ttakeout box\n🫔\ttamale\n🎋\ttanabata tree\n🍊\ttangerine\n🚕\ttaxi\n🧑‍🏫\tteacher\n🍵\tteacup without handle\n🫖\tteapot\n📆\ttear-off calendar\n🧑‍💻\ttechnologist\n🧸\tteddy bear\n☎️\ttelephone\n📞\ttelephone receiver\n🔭\ttelescope\n📺\ttelevision\n🕥\tten-thirty\n🕙\tten oclock\n🎾\ttennis\n⛺\ttent\n🧪\ttest tube\n🌡️\tthermometer\n🤔\tthinking face\n🩴\tthong sandal\n💭\tthought balloon\n🧵\tthread\n🕞\tthree-thirty\n🕒\tthree oclock\n👎\tthumbs down\n👍\tthumbs up\n🎫\tticket\n🐅\ttiger\n🐯\ttiger face\n⏲️\ttimer clock\n😫\ttired face\n🚽\ttoilet\n🍅\ttomato\n👅\ttongue\n🧰\ttoolbox\n🦷\ttooth\n🪥\ttoothbrush\n🎩\ttop hat\n🌪️\ttornado\n🖲️\ttrackball\n🚜\ttractor\n™️\ttrade mark\n🚆\ttrain\n🚊\ttram\n🚋\ttram car\n🏳️‍⚧️\ttransgender flag\n⚧️\ttransgender symbol\n🚩\ttriangular flag\n📐\ttriangular ruler\n🔱\ttrident emblem\n🧌\ttroll\n🚎\ttrolleybus\n🏆\ttrophy\n🍹\ttropical drink\n🐠\ttropical fish\n🎺\ttrumpet\n🌷\ttulip\n🥃\ttumbler glass\n🦃\tturkey\n🐢\tturtle\n🕧\ttwelve-thirty\n🕛\ttwelve oclock\n🐫\ttwo-hump camel\n🕝\ttwo-thirty\n💕\ttwo hearts\n🕑\ttwo oclock\n☂️\tumbrella\n⛱️\tumbrella on ground\n☔\tumbrella with rain drops\n😒\tunamused face\n🦄\tunicorn\n🔓\tunlocked\n↕️\tup-down arrow\n↖️\tup-left arrow\n↗️\tup-right arrow\n⬆️\tup arrow\n🙃\tupside-down face\n🔼\tupwards button\n🧛\tvampire\n🚦\tvertical traffic light\n📳\tvibration mode\n✌️\tvictory hand\n📹\tvideo camera\n🎮\tvideo game\n📼\tvideocassette\n🎻\tviolin\n🌋\tvolcano\n🏐\tvolleyball\n🖖\tvulcan salute\n🧇\twaffle\n🌘\twaning crescent moon\n🌖\twaning gibbous moon\n⚠️\twarning\n🗑️\twastebasket\n⌚\twatch\n🐃\twater buffalo\n🚾\twater closet\n🔫\twater pistol\n🌊\twater wave\n🍉\twatermelon\n👋\twaving hand\n〰️\twavy dash\n🌒\twaxing crescent moon\n🌔\twaxing gibbous moon\n🙀\tweary cat\n😩\tweary face\n💒\twedding\n🐋\twhale\n🛞\twheel\n☸️\twheel of dharma\n♿\twheelchair symbol\n🦯\twhite cane\n⚪\twhite circle\n❕\twhite exclamation mark\n🏳️\twhite flag\n💮\twhite flower\n🤍\twhite heart\n⬜\twhite large square\n◽\twhite medium-small square\n◻️\twhite medium square\n❔\twhite question mark\n▫️\twhite small square\n🔳\twhite square button\n🥀\twilted flower\n🎐\twind chime\n🌬️\twind face\n🪟\twindow\n🍷\twine glass\n😉\twinking face\n😜\twinking face with tongue\n🐺\twolf\n👩\twoman\n👫\twoman and man holding hands\n👩‍🎨\twoman artist\n👩‍🚀\twoman astronaut\n👩‍🦲\twoman bald\n🧔‍♀️\twoman beard\n🚴‍♀️\twoman biking\n👱‍♀️\twoman blond hair\n⛹️‍♀️\twoman bouncing ball\n🙇‍♀️\twoman bowing\n🤸‍♀️\twoman cartwheeling\n🧗‍♀️\twoman climbing\n👷‍♀️\twoman construction worker\n👩‍🍳\twoman cook\n👩‍🦱\twoman curly hair\n💃\twoman dancing\n🕵️‍♀️\twoman detective\n🧝‍♀️\twoman elf\n🤦‍♀️\twoman facepalming\n👩‍🏭\twoman factory worker\n🧚‍♀️\twoman fairy\n👩‍🌾\twoman farmer\n👩‍🍼\twoman feeding baby\n👩‍🚒\twoman firefighter\n🙍‍♀️\twoman frowning\n🧞‍♀️\twoman genie\n🙅‍♀️\twoman gesturing no\n🙆‍♀️\twoman gesturing ok\n💇‍♀️\twoman getting haircut\n💆‍♀️\twoman getting massage\n🏌️‍♀️\twoman golfing\n💂‍♀️\twoman guard\n👩‍⚕️\twoman health worker\n🧘‍♀️\twoman in lotus position\n👩‍🦽\twoman in manual wheelchair\n👩‍🦼\twoman in motorized wheelchair\n🧖‍♀️\twoman in steamy room\n🤵‍♀️\twoman in tuxedo\n👩‍⚖️\twoman judge\n🤹‍♀️\twoman juggling\n🧎‍♀️\twoman kneeling\n🏋️‍♀️\twoman lifting weights\n🧙‍♀️\twoman mage\n👩‍🔧\twoman mechanic\n🚵‍♀️\twoman mountain biking\n👩‍💼\twoman office worker\n👩‍✈️\twoman pilot\n🤾‍♀️\twoman playing handball\n🤽‍♀️\twoman playing water polo\n👮‍♀️\twoman police officer\n🙎‍♀️\twoman pouting\n🙋‍♀️\twoman raising hand\n👩‍🦰\twoman red hair\n🚣‍♀️\twoman rowing boat\n🏃‍♀️\twoman running\n👩‍🔬\twoman scientist\n🤷‍♀️\twoman shrugging\n👩‍🎤\twoman singer\n🧍‍♀️\twoman standing\n👩‍🎓\twoman student\n🦸‍♀️\twoman superhero\n🦹‍♀️\twoman supervillain\n🏄‍♀️\twoman surfing\n🏊‍♀️\twoman swimming\n👩‍🏫\twoman teacher\n👩‍💻\twoman technologist\n💁‍♀️\twoman tipping hand\n🧛‍♀️\twoman vampire\n🚶‍♀️\twoman walking\n👳‍♀️\twoman wearing turban\n👩‍🦳\twoman white hair\n🧕\twoman with headscarf\n👰‍♀️\twoman with veil\n👩‍🦯\twoman with white cane\n🧟‍♀️\twoman zombie\n👢\twomans boot\n👚\twomans clothes\n👒\twomans hat\n👡\twomans sandal\n👭\twomen holding hands\n👯‍♀️\twomen with bunny ears\n🤼‍♀️\twomen wrestling\n🚺\twomens room\n🪵\twood\n🥴\twoozy face\n🗺️\tworld map\n🪱\tworm\n😟\tworried face\n🎁\twrapped gift\n🔧\twrench\n✍️\twriting hand\n🩻\tx-ray\n🧶\tyarn\n🥱\tyawning face\n🟡\tyellow circle\n💛\tyellow heart\n🟨\tyellow square\n💴\tyen banknote\n☯️\tyin yang\n🪀\tyo-yo\n🤪\tzany face\n🦓\tzebra\n🤐\tzipper-mouth face\n🧟\tzombie\n🇦🇽\tland islands".split("\n").map(l=>l.split("\t"));
+function searchEmoji(q){
+  q=(q||"").trim().toLowerCase(); if(!q) return EMOJIS;
+  const hit=k=>k.split(" ").some(w=>w.startsWith(q))||k.includes(q);
+  const out=EMOJI_DB.filter(([e,k])=>hit(k)).map(x=>x[0]);
+  EMOJI_ALL.forEach(([e,k])=>{ if(k&&hit(k)) out.push(e); });
+  if(/\p{Extended_Pictographic}/u.test(q)) out.unshift(q);
+  return [...new Set(out)].slice(0,64);
+}
+function emojiButtons(list,cur){ return list.map(e=>`<button class="eopt" data-emoji="${esc(e)}" aria-pressed="${e===cur}">${esc(e)}</button>`).join(""); }
+function setEmoji(v,close){
+  const f=$("fEmoji"), a=$("fAvatar"); if(!f||!a) return;
+  f.value=v; a.innerHTML = v ? esc(v) : '<span class="ph">☺︎</span>';
+  document.querySelectorAll(".eopt").forEach(b=>b.setAttribute("aria-pressed", b.dataset.emoji===v));
+  if(close){ const pk=$("ePick"); if(pk) pk.hidden=true; const sI=$("eSearch"); if(sI) sI.value=""; const g=$("eGrid"); if(g) g.innerHTML=emojiButtons(EMOJIS,v); }
+}
+function whoForm(){
+  openSheet(`<div class="sheethead"><h2>Who’s using this phone?</h2></div>
+    <p style="color:var(--muted);margin:0">You can only check off your own days. Change this anytime in settings.</p>
+    <div class="who-big">${PEOPLE.map(p=>`<button data-me="${p.id}" style="border-color:${p.color}">${p.name}</button>`).join("")}</div>`);
+}
+function menuForm(){
+  openSheet(`<div class="sheethead"><h2>Settings</h2><button class="iconbtn" data-act="close" aria-label="Close">×</button></div>
+    <label class="f">This phone belongs to</label>
+    <div class="seg" style="margin-top:8px">${PEOPLE.map(p=>`<button data-me="${p.id}" aria-pressed="${p.id===state.me}">${p.name}</button>`).join("")}</div>
+    <label class="f">Check with</label>
+    <div class="seg" style="margin-top:8px"><button data-hand="left" aria-pressed="${handPref()==="left"}">✋ Left hand</button><button data-hand="right" aria-pressed="${handPref()==="right"}">Right hand 🤚</button></div>
+    <label class="f">Appearance</label>
+    <div class="seg" style="margin-top:8px">${[["auto","Auto"],["light","Light"],["dark","Dark"]].map(([v,n])=>`<button data-th="${v}" aria-pressed="${themePref()===v}">${n}</button>`).join("")}</div>
+    <p class="sstats">${FIREBASE_CONFIG?"Syncing is on.":"Preview mode: data stays on this device until syncing is set up."}</p>
+    <label class="f">Backup</label><div class="footer" style="margin-top:8px"><button class="btn" data-act="export">Download a backup</button></div>
+    ${FIREBASE_CONFIG?"":`<label class="f">Try it out</label><div class="footer" style="margin-top:8px"><button class="btn" data-act="simfill">Simulate ${esc(otherP().name)}’s check-ins</button></div><div class="footer" style="margin-top:8px"><button class="btn" data-act="simclear">Clear simulated data</button></div>`}`);
+}
+
+function addTodo(){
+  const inp=$("todoIn"); if(!inp||!state.sel) return;
+  const text=inp.value.trim(); if(!text) return;
+  const {h,d}=state.sel; inp.value=""; state.adding=false; inp.blur();
+  const item={id:uid(),text,done:false,by:state.me};
+  if(backend.addMemo) backend.addMemo(h,d,item); else saveTodos(h,d,[...todoItems(h,d),item]);
+}
+
+/* ---------- preview helper: simulate the other person ---------- */
+const otherP=()=>PEOPLE.find(p=>p.id!==(state.me||"euni"));
+function simulate(){
+  const o=otherP(), t=today(), days=weekDays(weekStart(new Date()));
+  const notes=["Felt great today!","Did it before work","Short one today","Let’s do this together tomorrow"];
+  Object.values(state.habits).forEach(h=>{
+    days.forEach(d=>{
+      if(d>t||!isSched(h,d)||!started(h,d)) return;
+      if(d!==t && Math.random()<0.3) return;
+      state.checks[ck(h.id,o.id,d)]={habitId:h.id,person:o.id,date:d,done:true,memo:"",feel:FEELS[Math.floor(Math.random()*3)].id,amount:h.unit?Math.ceil(Math.random()*30):null,sample:true};
+    });
+    if(isSched(h,t)&&started(h,t)){
+      const key=tk(h.id,t), cur=state.todos[key]||{habitId:h.id,date:t,items:[]};
+      cur.items=[...(cur.items||[]),{id:uid(),text:notes[Math.floor(Math.random()*notes.length)],done:false,by:o.id,sample:true}];
+      state.todos[key]=cur;
+    }
+  });
+  local.save(); render();
+}
+function clearSim(){
+  for(const k in state.checks) if(state.checks[k].sample) delete state.checks[k];
+  for(const k in state.todos){ const t=state.todos[k]; t.items=(t.items||[]).filter(i=>!i.sample); if(!t.items.length) delete state.todos[k]; }
+  local.save(); render();
+}
+
+async function exportBackup(){
+  const data = backend.fetchAll ? await backend.fetchAll() : {habits:state.habits,checks:state.checks,todos:state.todos};
+  data.exported=new Date().toISOString();
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"});
+  const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download=`us-habits-backup-${today()}.json`;
+  document.body.appendChild(a); a.click(); a.remove();
+}
+
+/* ---------- after-check hint: teaches long press, offers a shortcut ---------- */
+let toastTimer=null, toastTarget=null;
+function showDetailsToast(h,d){
+  let n=0; try{ n=+(localStorage.getItem("us-habits-hintcount")||0); }catch(e){}
+  if(n>=8) return;
+  try{ localStorage.setItem("us-habits-hintcount", n+1); }catch(e){}
+  toastTarget={h,d};
+  const el=$("toast"); el.hidden=false; el.classList.remove("pop"); void el.offsetWidth; el.classList.add("pop");
+  clearTimeout(toastTimer); toastTimer=setTimeout(()=>{ el.hidden=true; },3500);
+}
+
+/* ---------- events ---------- */
+document.addEventListener("click",e=>{
+  if(suppressClick){ suppressClick=false; if(e.target.closest(".circle")) return; }
+  if(state.sel && !e.target.closest(".panel") && !e.target.closest(".sheet")){
+    state.sel=null; render();
+    if(!e.target.closest("button")) return;
+  }
+  const t=e.target.closest("button"); if(!t){ if(e.target.id==="ov") closeSheet(); return; }
+  if(t.id==="addBtn"){ habitForm(); return; }
+  if(t.id==="menuBtn"){ menuForm(); return; }
+  if(t.id==="prevW"){ changeWeek(-1); return; }
+  if(t.id==="nextW"){ changeWeek(1); return; }
+  if(t.id==="weekLabel"){ state.week=weekStart(new Date()); state.sel=null; render(); return; }
+  if(t.dataset.edit){ habitForm(state.habits[t.dataset.edit]); return; }
+  if(t.classList.contains("circle")){
+    if(suppressClick){ suppressClick=false; return; }
+    if(!state.me){ whoForm(); return; }
+    const {h,d}=t.dataset, now=!done(h,state.me,d);
+    if(now) state.pop={h,d};
+    setDone(h,state.me,d,now);
+    if(now) showDetailsToast(h,d);
+    return;
+  }
+  if(t.dataset.st!==undefined && state.sel){ state.pop={...state.sel}; setDone(state.sel.h,state.me,state.sel.d,t.dataset.st==="1"); return; }
+  if(t.dataset.tt && state.sel){ const {h,d}=state.sel; saveTodos(h,d,todoItems(h,d).map(i=>i.id===t.dataset.tt?{...i,done:!i.done}:i)); return; }
+  if(t.dataset.td && state.sel){ const {h,d}=state.sel, it=todoItems(h,d).find(i=>i.id===t.dataset.td); if(!it) return;
+    if(backend.removeMemo) backend.removeMemo(h,d,it); else saveTodos(h,d,todoItems(h,d).filter(i=>i.id!==t.dataset.td)); return; }
+  if(t.dataset.hand){ try{ localStorage.setItem(HAND_KEY,t.dataset.hand); }catch(err){} document.querySelectorAll("[data-hand]").forEach(b=>b.setAttribute("aria-pressed", b===t)); render(); return; }
+  if(t.dataset.th){ try{ localStorage.setItem(THEME_KEY,t.dataset.th); }catch(err){} document.querySelectorAll("[data-th]").forEach(b=>b.setAttribute("aria-pressed", b===t)); applyPrefs(); return; }
+  if(t.dataset.logh){ state.tab="week"; state.week=weekStart(parse(t.dataset.logd)); state.sel={h:t.dataset.logh,d:t.dataset.logd}; state.adding=false; render(); return; }
+  if(t.dataset.tab){ state.tab=t.dataset.tab; state.sel=null; try{localStorage.setItem("us-habits-tab",state.tab);}catch(err){} render(); window.scrollTo(0,0); return; }
+  if(t.dataset.tod){ document.querySelectorAll("[data-tod]").forEach(b=>b.setAttribute("aria-pressed", b===t)); return; }
+  if(t.dataset.feel && state.sel){ const {h,d}=state.sel, cur=check(h,state.me,d)||{}; state.pop={...state.sel}; setField(h,state.me,d,"feel",cur.feel===t.dataset.feel?null:t.dataset.feel); return; }
+  if(t.dataset.emoji!==undefined){ emojiManual=true; setEmoji(t.dataset.emoji,true); return; }
+  if(t.dataset.tpl!==undefined){ applyTemplate(TEMPLATES[+t.dataset.tpl]); return; }
+  if(t.dataset.preset){ const sets={all:[0,1,2,3,4,5,6],weekdays:[1,2,3,4,5],weekends:[0,6],none:[]}; document.querySelectorAll(".dpill").forEach(b=>b.setAttribute("aria-pressed", sets[t.dataset.preset].includes(+b.dataset.dp))); return; }
+  if(t.dataset.dp!==undefined){ t.setAttribute("aria-pressed", t.getAttribute("aria-pressed")!=="true"); return; }
+  if(t.dataset.me){ state.me=t.dataset.me; try{localStorage.setItem(LS_ME,state.me);}catch(err){} closeSheet(); render(); return; }
+  const act=t.dataset.act;
+  if(act==="close") closeSheet();
+  else if(act==="toastdetails"){ clearTimeout(toastTimer); $("toast").hidden=true; if(toastTarget){ state.sel=toastTarget; state.adding=false; render(); } }
+  else if(act==="pclose"){ state.sel=null; render(); }
+  else if(act==="tipok"){ try{ localStorage.setItem("us-habits-tip","1"); }catch(err){} $("tip").hidden=true; }
+  else if(act==="export"){ exportBackup(); }
+  else if(act==="simfill"){ closeSheet(); simulate(); }
+  else if(act==="simclear"){ closeSheet(); clearSim(); }
+  else if(act==="emojipick"){ const pk=$("ePick"); if(pk) pk.hidden=!pk.hidden; }
+  else if(act==="startadd"){ state.adding=true; render(); const i=$("todoIn"); if(i){ i.focus(); } }
+  else if(act==="addtodo") addTodo();
+  else if(act==="del"){ const h=state.habits[state.editing]; if(h && confirm(`Delete “${h.name}” and all its check-ins?`)){ closeSheet(); if(state.sel&&state.sel.h===h.id) state.sel=null; backend.deleteHabit(h.id); } }
+  else if(act==="save"){
+    const name=$("fName").value.trim(); if(!name){ $("fName").focus(); return; }
+    const id=state.editing || ("h"+uid());
+    const prev=state.habits[id]||{};
+    const days=[...document.querySelectorAll(".dpill")].filter(b=>b.getAttribute("aria-pressed")==="true").map(b=>+b.dataset.dp);
+    if(!days.length){ alert("Pick at least one day."); return; }
+    const {target, ...keep}=prev;
+    const todB=document.querySelector('[data-tod][aria-pressed="true"]');
+    backend.setHabit({...keep,id,name,emoji:$("fEmoji").value.trim(),days,tod:todB?todB.dataset.tod:"anytime",unit:$("fUnit").value.trim(),start:$("fStart").value||today(),
+      created:prev.created||today(),order:prev.order||Date.now()});
+    closeSheet();
+  }
+});
+document.addEventListener("change",e=>{
+  if(e.target.matches("input[data-amt]") && state.sel){ const v=parseFloat(e.target.value); e.target.blur(); setField(state.sel.h,state.me,state.sel.d,"amount",isNaN(v)?null:v); return; }
+  if(e.target.matches("textarea[data-memo]") && state.sel){ const v=e.target.value; e.target.blur(); setMemo(state.sel.h,state.me,state.sel.d,v); }
+});
+document.addEventListener("keydown",e=>{ if(e.key==="Enter" && e.target.id==="todoIn"){ e.preventDefault(); addTodo(); } if(e.key==="Enter" && e.target.id==="fName"){ e.preventDefault(); const sv=document.querySelector('[data-act="save"]'); if(sv) sv.click(); } });
+document.addEventListener("focusout",e=>{
+  if(e.target.id==="todoIn" && !e.target.value.trim()){ setTimeout(()=>{ if(document.activeElement && document.activeElement.dataset && document.activeElement.dataset.act==="addtodo") return; state.adding=false; render(); },120); return; }
+  setTimeout(()=>{ if(deferred) render(); },0);
+});
+document.addEventListener("input",e=>{ if(e.target.id==="fName"){ autoEmoji(e.target.value); return; } if(e.target.id==="eSearch"){ const r=searchEmoji(e.target.value); $("eGrid").innerHTML = r.length ? emojiButtons(r,$("fEmoji").value) : `<span class="enone">No matches. Try another word.</span>`; return; } if(e.target.tagName==="TEXTAREA"){ e.target.style.height="auto"; e.target.style.height=e.target.scrollHeight+"px"; } });
+
+/* ---------- long press: open the day's dropdown ---------- */
+let lpTimer=null, suppressClick=false;
+document.addEventListener("pointerdown",e=>{
+  suppressClick=false;
+  const c=e.target.closest(".circle"); if(!c||c.disabled) return;
+  clearTimeout(lpTimer);
+  lpTimer=setTimeout(()=>{
+    suppressClick=true;
+    const {h,d}=c.dataset;
+    state.sel = (state.sel&&state.sel.h===h&&state.sel.d===d) ? null : {h,d}; state.adding=false;
+    if(navigator.vibrate) navigator.vibrate(10);
+    render();
+  },450);
+});
+["pointerup","pointercancel"].forEach(ev=>document.addEventListener(ev,()=>clearTimeout(lpTimer)));
+document.addEventListener("contextmenu",e=>{ if(e.target.closest(".circle")) e.preventDefault(); });
+
+/* ---------- swipe the habits left/right to change week ---------- */
+function changeWeek(n){
+  state.week=addDays(state.week,7*n); state.sel=null; render();
+  if(backend.ensureWeek) backend.ensureWeek(state.week);
+  const l=$("list"); l.classList.remove("slide-l","slide-r"); void l.offsetWidth; l.classList.add(n>0?"slide-l":"slide-r");
+}
+let sx=0, sy=0, swiping=false;
+document.addEventListener("touchstart",e=>{
+  if(e.target.closest(".panel,.sheet,input,textarea")){ swiping=false; return; }
+  const p=e.touches[0]; sx=p.clientX; sy=p.clientY; swiping=true;
+},{passive:true});
+document.addEventListener("touchmove",e=>{
+  if(!swiping) return; const p=e.touches[0];
+  if(Math.abs(p.clientX-sx)>10||Math.abs(p.clientY-sy)>10) clearTimeout(lpTimer);
+},{passive:true});
+document.addEventListener("touchend",e=>{
+  if(!swiping) return; swiping=false;
+  if(state.tab!=="week") return;
+  const p=e.changedTouches[0], dx=p.clientX-sx, dy=p.clientY-sy;
+  if(Math.abs(dx)>60 && Math.abs(dx)>Math.abs(dy)*1.5){ suppressClick=true; changeWeek(dx<0?1:-1); }
+});
+
+/* ---------- start ---------- */
+backend = (FIREBASE_CONFIG && ROOM_ID) ? remote : local;
+render();
+Promise.resolve().then(()=>backend.init()).catch(()=>{ backend=local; local.init(); });
+if(!state.me) whoForm();
+</script>
+</body>
+</html>
