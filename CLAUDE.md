@@ -10,7 +10,7 @@ A small, free web app for two people to track the same habits together on iPhone
 
 ## Status
 - Design is in active iteration.
-- Firebase is **not set up yet**. Next step: create project (Firestore in europe-west6, production mode), generate a long random room ID (keep it only in the Firebase rules and the private link), publish the rules below, paste `firebaseConfig` into `index.html`, push, then open the private link on both phones and add to Home Screen. GitHub repo and Pages are done.
+- Firebase is set up (project `us-habits`, Firestore, rules published, config in `index.html`). Remaining: open the private link on both phones and add to Home Screen.
 
 Firestore rules:
 ```
