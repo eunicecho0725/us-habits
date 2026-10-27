@@ -26,13 +26,15 @@ service cloud.firestore {
 
 ## Features
 - **Tabs (bottom bar):** Today | Week | Log, plus a floating + button.
-- **Today:** title is the full date. Only habits scheduled today, grouped by small uppercase labels (MORNING / AFTERNOON / EVENING / ANYTIME) with a hairline. One large check circle per habit. No second info line, no scoreboard.
+- **Today:** title is the full date. Only habits scheduled today, grouped by small uppercase labels (MORNING / AFTERNOON / EVENING / ANYTIME) with a hairline. One large check circle per habit. Today's memos show under the habit name (author dot + text, secondary color); hidden while that habit's dropdown is open. No memo badge on Today's circles (the memos are visible). No scoreboard.
 - **Week:** title is the date range with ‹ › beside it; "↩ Back to this week" link only when off the current week. One pinned day header (weekday + date, today highlighted) aligned to 7 columns of circles below. Swipe left/right to change weeks. Streak shown as a small 🔥N pill after the habit name. Schedule pill on the right (e.g. "Mo Th Sa ›") is the only way to open edit.
 - **Log:** read-only timeline of memos and logged amounts, newest first (Today / Yesterday / dates). Tapping an entry opens that day in Week with details open.
 - **Tap a circle:** toggles your own check (with a pop animation). Past days are editable; only future days are locked. Logging before a habit's start date moves the start date back.
-- **Hold a circle (~450 ms):** opens an inline dropdown under the habit: date, "🎉 You both did it!" banner when both checked, amount field (only if the habit tracks a unit and you checked), shared memos (each with author dot and ×), "+ Add a memo" → input with Save. Tap outside or the bottom handle to close.
-- **After-check toast:** "Checked! Hold a circle to log more." + Add details button. Shows for the first 8 check-ins per device.
-- **One-time tip** on first launch (tap / hold / swipe).
+- **Tap a habit's name** (Today: name + memo lines; Week: the name): toggles that habit's details. Today opens today with the memo field already focused (keyboard up) and no date line; Week opens today, or the latest past day of the shown week, with the date line. Rule: circle = check, name = details.
+- **Week details date line:** ‹ Tue, Oct 27 › steps one day at a time (crosses into other weeks; › disabled on today). No arrows on Today. Selected day gets an inset ring (never clipped).
+- **Hold a circle (~450 ms):** shortcut to open a specific day. Opens an inline dropdown tight under the habit (no card, aligned with the habit, ~6px below the circles): date, amount field (only if the habit tracks a unit and you checked), date line in secondary style (smaller than the habit name), shared memos (author dot on the left, then text, no dividers between memos; red trash icon only on your own memos → tap turns it into a red "Delete" pill, tap again to delete, tap anywhere else to cancel; no native confirm() since the preview iframe blocks it), "+ Add a memo" → compact input (36px tall, 16px text so iOS doesn't zoom) with Save. Close by tapping the name again or tapping outside; no grabber/handle.
+- **After-check toast:** "Checked! Tap the name to add a memo." + Add details button. Shows for the first 8 check-ins per device.
+- **One-time tip** on first launch (tap circle / tap name / swipe).
 - **Habit form:** emoji avatar + name side by side; emoji auto-suggested from the name; emoji picker with keyword search (~1,850 emojis); quick-pick templates; days via presets (Every day / Weekdays / Weekends / Clear) + Su–Sa pills; time of day; "More options" (amount unit, start date); Enter saves; Delete is a quiet text link.
 - **Settings (⋯):** who uses this phone, hand (left/right; defaults left for Euni), appearance (Auto/Light/Dark), Download a backup (JSON), and in preview mode: Simulate partner's check-ins / Clear simulated data.
 
@@ -41,7 +43,9 @@ service cloud.firestore {
 - Soft, gentle palette (no harsh saturated colors). Euni = soft sky blue, Mikey = soft rose, defined in oklch with light/dark variants. "Both did it" = smooth oklch gradient blue → rose with a ✓ (no half-and-half split, no smiley).
 - Filled circles: person color + ✓; checkmark color `--on-fill` (white in light, dark in dark mode).
 - Scheduled empty days = soft gray circle; rest days = blank (no dots, no outlines).
-- Days with memos: small corner badge dot in the author's color (gradient if both).
+- Days with memos (Week tab): small corner badge dot in the author's color (gradient if both).
+- Dividers only between habits, never between memos.
+- No "You both did it!" banner (the gradient circle says it).
 - No color legend, no per-person score lines, no partner chips in the dropdown, no Did it / Not today buttons, no Easy/Good/Tough feel picker, no to-do checkboxes on memos.
 - Left-hand mode mirrors the bottom bar (+ on the left) and puts Today's check circles on the left.
 - Minimal and calm at first glance; details live behind hold.

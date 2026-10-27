@@ -435,6 +435,37 @@ label.f .opt{font-size:.74rem}
 /* left-hand mode */
 body.lefty .bottombar{flex-direction:row-reverse}
 body.lefty .trow{flex-direction:row-reverse}
+.phead b{font-size:var(--t-subhead);font-weight:600;color:var(--label-2)}
+[data-open]{cursor:pointer;-webkit-user-select:none;user-select:none}
+[data-open]:focus-visible{outline-offset:4px;border-radius:6px}
+.phead{justify-content:flex-start;gap:2px}
+.daystep{appearance:none;border:0;background:none;color:var(--accent);font-size:22px;line-height:1;min-width:32px;min-height:var(--tap);margin:-12px 0;padding:0 4px;cursor:pointer}
+.daystep:first-child{text-align:left;padding:0}
+/* keep the selected-day ring on empty circles too */
+.cell .circle.sel{box-shadow:inset 0 0 0 2px var(--accent),inset 0 0 0 4px var(--bg)}
+.daystep:disabled{color:var(--label-3);cursor:default}
+/* opened day sits tight under the circles, aligned with the habit, no card */
+.panel{margin-top:6px;padding:0}
+.panel::before{display:none}
+.panel .phead{margin-bottom:2px}
+.panel .notes{margin-top:0}
+.panel .extra{margin-top:4px}
+.panel .addlink{padding:6px 0 0}
+.panel{padding-bottom:6px}
+/* compact memo field (16px keeps iOS from zooming in on focus) */
+.panel .addtodo{margin-top:6px;gap:8px}
+.panel .addtodo input{min-height:36px;padding:6px 12px;font-size:16px;line-height:22px}
+.panel .addtodo button{min-height:36px;padding:0 14px;border-radius:var(--r-control);font-size:var(--t-subhead)}
+.panel .todo{border-bottom:0;gap:10px;align-items:flex-start}
+.panel .todo .adot{margin-top:7px}
+.panel .todo .ttext{line-height:22px;overflow-wrap:anywhere;min-width:0}
+.panel .todo .delok{margin-top:-4px}
+.delbtn{appearance:none;border:0;background:none;color:var(--danger);cursor:pointer;display:grid;place-items:center;min-width:var(--tap);min-height:var(--tap);margin:-10px -12px -10px 0;padding:0;flex:none}
+.delok{appearance:none;border:0;border-radius:999px;background:var(--danger);color:#fff;font:inherit;font-size:var(--t-subhead);font-weight:600;padding:6px 14px;cursor:pointer;flex:none}
+.tmemos{margin-top:4px;display:flex;flex-direction:column;gap:3px}
+.tmemo{display:flex;align-items:baseline;gap:7px;font-size:var(--t-subhead);line-height:20px;color:var(--label-2)}
+.tmemo .adot{width:7px;height:7px;flex:none;transform:translateY(-1px)}
+.tmemo span{min-width:0;overflow-wrap:anywhere}
 body.lefty #banner{right:auto;left:max(16px, calc((100vw - 480px)/2 + 16px))}
 .toast{position:fixed;left:16px;right:16px;max-width:448px;margin:0 auto;bottom:calc(92px + env(safe-area-inset-bottom,0px));display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 10px 10px 16px;border-radius:16px;background:var(--glass-strong);-webkit-backdrop-filter:saturate(180%) blur(30px);backdrop-filter:saturate(180%) blur(30px);border:.5px solid var(--separator);box-shadow:0 10px 28px rgba(0,0,0,.18);z-index:16;font-size:var(--t-subhead);color:var(--label)}
 .toast[hidden]{display:none}
@@ -480,10 +511,10 @@ body.lefty #banner{right:auto;left:max(16px, calc((100vw - 480px)/2 + 16px))}
   <div class="list" id="list"></div>
 </div>
 
-<div class="toast" id="toast" role="status" hidden><span>Checked! <b>Hold</b> a circle to log more.</span><button data-act="toastdetails">Add details</button></div>
+<div class="toast" id="toast" role="status" hidden><span>Checked! Tap the <b>name</b> to add a memo.</span><button data-act="toastdetails">Add details</button></div>
 <div class="tip" id="tip" role="status" hidden>
   <p><b>Tap</b> a circle to check it off.</p>
-  <p><b>Hold</b> it for notes, amount, and how it felt.</p>
+  <p>Tap a habit’s <b>name</b> for memos and amounts.</p>
   <p><b>Swipe</b> in Week view to change weeks.</p>
   <button data-act="tipok">Got it</button>
 </div>
@@ -548,6 +579,7 @@ const started = (h,date) => date >= (h.start||h.created||"0000");
 const check = (hid,p,date) => state.checks[ck(hid,p,date)];
 const done = (hid,p,date) => !!(check(hid,p,date)||{}).done;
 const todoItems = (hid,date) => ((state.todos[tk(hid,date)]||{}).items)||[];
+const canDelMemo = it => !it.by || it.by===state.me;
 const person = id => PEOPLE.find(p=>p.id===id);
 const esc = s => String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const uid = () => Date.now().toString(36)+Math.random().toString(36).slice(2,6);
@@ -677,7 +709,7 @@ function render(){
   $("tip").hidden = seen || !hs.length || !state.me;
   const open=!!document.querySelector(".panel");
   document.body.classList.toggle("panel-open",open);
-  if(!open) state.adding=false;
+  if(!open){ state.adding=false; state.confirmDel=null; }
   const key=state.sel?state.tab+state.sel.h+state.sel.d:null;
   if(open && key!==lastOpened){ const pn=document.querySelector(".panel"); requestAnimationFrame(()=>pn.scrollIntoView({behavior:"smooth",block:"nearest"})); }
   lastOpened=key;
@@ -713,7 +745,7 @@ function weekHTML(hs){
     const dl = sched(h).length===7 ? "Every day" : sched(h).map(i=>DOW[i]).join(" ");
     const showPanel = state.sel && state.sel.h===h.id && days.includes(state.sel.d);
     return `<div class="card">
-      <div class="cardhead"><span class="hname">${h.emoji?`<span class="hemoji">${esc(h.emoji)}</span>`:""}${esc(h.name)}${sk?`<span class="streak${sk>=7?" hot":""}" aria-label="${sk} day streak">🔥${sk}</span>`:""}</span><button class="target editbtn" data-edit="${h.id}" aria-label="Edit ${esc(h.name)}">${dl} ›</button></div>
+      <div class="cardhead"><span class="hname" data-open="${h.id}" role="button" tabindex="0" aria-expanded="${!!showPanel}">${h.emoji?`<span class="hemoji">${esc(h.emoji)}</span>`:""}${esc(h.name)}${sk?`<span class="streak${sk>=7?" hot":""}" aria-label="${sk} day streak">🔥${sk}</span>`:""}</span><button class="target editbtn" data-edit="${h.id}" aria-label="Edit ${esc(h.name)}">${dl} ›</button></div>
       <div class="grid">${cells}</div>
       ${showPanel ? panel(h, state.sel.d, `${(days.indexOf(state.sel.d)+0.5)/7*100}%`) : ""}
     </div>`;
@@ -752,8 +784,8 @@ function todayHTML(hs){
     meta.push(`${esc(other.name)} ${oc.done?`✓ ${feelE(oc.feel)}`:"not yet"}`.trim());
     if(notes) meta.push(`📝 ${notes}`);
     return `<div class="trow-wrap"><div class="trow">
-      <div class="tinfo"><div class="tname">${h.emoji?`<span class="hemoji">${esc(h.emoji)}</span>`:""}${esc(h.name)}</div></div>
-      <div class="cell"><button class="circle big${isSel?" sel":""}${isPop?" pop":""}" data-h="${h.id}" data-d="${t}" style="${circleStyle(who)}" aria-label="${esc(h.name)}${who.length?": "+who.map(p=>p.name).join(" and ")+" did it":""}">${circleGlyph(who)}${noteBadge(h.id,t)}</button>${isPop&&who.length===2?`<span class="burst" aria-hidden="true">🎉</span>`:""}</div>
+      <div class="tinfo" data-open="${h.id}" role="button" tabindex="0" aria-expanded="${!!isSel}"><div class="tname">${h.emoji?`<span class="hemoji">${esc(h.emoji)}</span>`:""}${esc(h.name)}</div>${!isSel&&notes?`<div class="tmemos">${todoItems(h.id,t).map(it=>`<div class="tmemo"><i class="adot" style="background:${(person(it.by)||{}).color||"var(--muted)"}"></i><span>${esc(it.text)}</span></div>`).join("")}</div>`:""}</div>
+      <div class="cell"><button class="circle big${isSel?" sel":""}${isPop?" pop":""}" data-h="${h.id}" data-d="${t}" style="${circleStyle(who)}" aria-label="${esc(h.name)}${who.length?": "+who.map(p=>p.name).join(" and ")+" did it":""}">${circleGlyph(who)}</button>${isPop&&who.length===2?`<span class="burst" aria-hidden="true">🎉</span>`:""}</div>
     </div>${isSel?panel(h,t,handPref()==="left"?"28px":"calc(100% - 28px)"):""}</div>`;
   };
   const groups = TODS.map(g=>{ const items=due.filter(h=>(h.tod||"anytime")===g.id); return items.length?`<div class="tgroup"><div class="tglabel" role="heading" aria-level="2"><span>${g.n}</span></div>${items.map(row).join("")}</div>`:""; }).join("");
@@ -763,21 +795,19 @@ function todayHTML(hs){
 function panel(h,d,xpos){
   const me=state.me, mine=check(h.id,me,d)||{}, myColor=person(me).color, dd=parse(d);
   const other=PEOPLE.find(p=>p.id!==me), oc=check(h.id,other.id,d)||{};
-  const items=todoItems(h.id,d), pp=POP&&POP.h===h.id&&POP.d===d;
+  const items=todoItems(h.id,d);
   const x = xpos;
   return `<div class="panel" style="--x:${x}">
-    <div class="phead">
-      <b>${DAYN[dd.getDay()]}, ${MON[dd.getMonth()]} ${dd.getDate()}${!isSched(h,d)?' <span class="rest">· rest day</span>':""}</b>
-    </div>
-    ${(mine.done&&oc.done)?`<div class="both${pp?" pop":""}">🎉 You both did it!</div>`:""}
+    ${state.tab!=="week"?"":`<div class="phead">
+      <button class="daystep" data-step="-1" aria-label="Previous day">‹</button><b>${DAYN[dd.getDay()]}, ${MON[dd.getMonth()]} ${dd.getDate()}${!isSched(h,d)?' <span class="rest">· rest day</span>':""}</b><button class="daystep" data-step="1" aria-label="Next day" ${d>=today()?"disabled":""}>›</button>
+    </div>`}
     ${mine.done&&h.unit?`<div class="extra">
       <div class="amt"><input type="number" inputmode="decimal" min="0" data-amt value="${mine.amount??""}" placeholder="0"><span>${esc(h.unit)}</span></div>
     </div>`:""}
-    ${items.length?`<div class="notes">${items.map(it=>`<div class="todo"><span class="ttext">${esc(it.text)}</span><i class="adot" title="${esc((person(it.by)||{}).name||"")}" style="background:${(person(it.by)||{}).color||"var(--muted)"}"></i><button class="xbtn" data-td="${it.id}" aria-label="Remove">×</button></div>`).join("")}</div>`:""}
+    ${items.length?`<div class="notes">${items.map(it=>`<div class="todo"><i class="adot" title="${esc((person(it.by)||{}).name||"")}" style="background:${(person(it.by)||{}).color||"var(--muted)"}"></i><span class="ttext">${esc(it.text)}</span>${!canDelMemo(it)?"":state.confirmDel===it.id?`<button class="delok" data-tdok="${it.id}">Delete</button>`:`<button class="delbtn" data-td="${it.id}" aria-label="Delete memo"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M5.5 7l1 12a2 2 0 0 0 2 2h7a2 2 0 0 0 2-2l1-12M9 7V4.5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1V7"/></svg></button>`}</div>`).join("")}</div>`:""}
     ${state.adding
       ? `<div class="addtodo"><input type="text" id="todoIn" maxlength="120" placeholder="Write a memo…" enterkeyhint="done"><button data-act="addtodo">Save</button></div>`
       : `<button class="addlink" data-act="startadd">+ Add a memo</button>`}
-    <button class="closebar" data-act="pclose" aria-label="Close"><span></span></button>
   </div>`;
 }
 
@@ -940,6 +970,8 @@ function showDetailsToast(h,d){
 /* ---------- events ---------- */
 document.addEventListener("click",e=>{
   if(suppressClick){ suppressClick=false; if(e.target.closest(".circle")) return; }
+  if(state.confirmDel && !e.target.closest("[data-tdok]")){ state.confirmDel=null; if(!e.target.closest("[data-td]")) render(); }
+  const op=e.target.closest("[data-open]"); if(op){ openDetails(op.dataset.open); return; }
   if(state.sel && !e.target.closest(".panel") && !e.target.closest(".sheet")){
     state.sel=null; render();
     if(!e.target.closest("button")) return;
@@ -962,8 +994,11 @@ document.addEventListener("click",e=>{
   }
   if(t.dataset.st!==undefined && state.sel){ state.pop={...state.sel}; setDone(state.sel.h,state.me,state.sel.d,t.dataset.st==="1"); return; }
   if(t.dataset.tt && state.sel){ const {h,d}=state.sel; saveTodos(h,d,todoItems(h,d).map(i=>i.id===t.dataset.tt?{...i,done:!i.done}:i)); return; }
-  if(t.dataset.td && state.sel){ const {h,d}=state.sel, it=todoItems(h,d).find(i=>i.id===t.dataset.td); if(!it) return;
-    if(backend.removeMemo) backend.removeMemo(h,d,it); else saveTodos(h,d,todoItems(h,d).filter(i=>i.id!==t.dataset.td)); return; }
+  if(t.dataset.step && state.sel){ const nd=ymd(addDays(parse(state.sel.d),+t.dataset.step)); if(nd>today()) return;
+    state.sel={...state.sel,d:nd}; state.adding=false; const ws=weekStart(parse(nd)); if(ws.getTime()!==weekStart(state.week).getTime()){ state.week=ws; if(backend.ensureWeek) backend.ensureWeek(ws); } render(); return; }
+  if(t.dataset.td && state.sel){ const it=todoItems(state.sel.h,state.sel.d).find(i=>i.id===t.dataset.td); if(it&&canDelMemo(it)){ state.confirmDel=it.id; render(); } return; }
+  if(t.dataset.tdok && state.sel){ const {h,d}=state.sel, it=todoItems(h,d).find(i=>i.id===t.dataset.tdok); state.confirmDel=null; if(!it||!canDelMemo(it)){ render(); return; }
+    if(backend.removeMemo) backend.removeMemo(h,d,it); else saveTodos(h,d,todoItems(h,d).filter(i=>i.id!==it.id)); return; }
   if(t.dataset.hand){ try{ localStorage.setItem(HAND_KEY,t.dataset.hand); }catch(err){} document.querySelectorAll("[data-hand]").forEach(b=>b.setAttribute("aria-pressed", b===t)); render(); return; }
   if(t.dataset.th){ try{ localStorage.setItem(THEME_KEY,t.dataset.th); }catch(err){} document.querySelectorAll("[data-th]").forEach(b=>b.setAttribute("aria-pressed", b===t)); applyPrefs(); return; }
   if(t.dataset.logh){ state.tab="week"; state.week=weekStart(parse(t.dataset.logd)); state.sel={h:t.dataset.logh,d:t.dataset.logd}; state.adding=false; render(); return; }
@@ -978,7 +1013,6 @@ document.addEventListener("click",e=>{
   const act=t.dataset.act;
   if(act==="close") closeSheet();
   else if(act==="toastdetails"){ clearTimeout(toastTimer); $("toast").hidden=true; if(toastTarget){ state.sel=toastTarget; state.adding=false; render(); } }
-  else if(act==="pclose"){ state.sel=null; render(); }
   else if(act==="tipok"){ try{ localStorage.setItem("us-habits-tip","1"); }catch(err){} $("tip").hidden=true; }
   else if(act==="export"){ exportBackup(); }
   else if(act==="simfill"){ closeSheet(); simulate(); }
@@ -1004,7 +1038,7 @@ document.addEventListener("change",e=>{
   if(e.target.matches("input[data-amt]") && state.sel){ const v=parseFloat(e.target.value); e.target.blur(); setField(state.sel.h,state.me,state.sel.d,"amount",isNaN(v)?null:v); return; }
   if(e.target.matches("textarea[data-memo]") && state.sel){ const v=e.target.value; e.target.blur(); setMemo(state.sel.h,state.me,state.sel.d,v); }
 });
-document.addEventListener("keydown",e=>{ if(e.key==="Enter" && e.target.id==="todoIn"){ e.preventDefault(); addTodo(); } if(e.key==="Enter" && e.target.id==="fName"){ e.preventDefault(); const sv=document.querySelector('[data-act="save"]'); if(sv) sv.click(); } });
+document.addEventListener("keydown",e=>{ if((e.key==="Enter"||e.key===" ") && e.target.dataset && e.target.dataset.open){ e.preventDefault(); openDetails(e.target.dataset.open); return; } if(e.key==="Enter" && e.target.id==="todoIn"){ e.preventDefault(); addTodo(); } if(e.key==="Enter" && e.target.id==="fName"){ e.preventDefault(); const sv=document.querySelector('[data-act="save"]'); if(sv) sv.click(); } });
 document.addEventListener("focusout",e=>{
   if(e.target.id==="todoIn" && !e.target.value.trim()){ setTimeout(()=>{ if(document.activeElement && document.activeElement.dataset && document.activeElement.dataset.act==="addtodo") return; state.adding=false; render(); },120); return; }
   setTimeout(()=>{ if(deferred) render(); },0);
@@ -1029,6 +1063,14 @@ document.addEventListener("pointerdown",e=>{
 document.addEventListener("contextmenu",e=>{ if(e.target.closest(".circle")) e.preventDefault(); });
 
 /* ---------- swipe the habits left/right to change week ---------- */
+/* Tap a habit name: toggle its details for today (Today tab) or for today / the latest past day of the shown week (Week tab). */
+function openDetails(hid){
+  const t=today(), days=state.tab==="week"?weekDays(state.week):[t];
+  if(state.sel && state.sel.h===hid && days.includes(state.sel.d)){ state.sel=null; render(); return; }
+  const d = days.includes(t) ? t : days[6]<t ? days[6] : days[0];
+  state.sel={h:hid,d}; state.adding=state.tab==="today"; render();
+  if(state.adding){ const i=$("todoIn"); if(i) i.focus(); }
+}
 function changeWeek(n){
   state.week=addDays(state.week,7*n); state.sel=null; render();
   if(backend.ensureWeek) backend.ensureWeek(state.week);
