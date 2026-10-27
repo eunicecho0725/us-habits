@@ -494,10 +494,20 @@ body.lefty #banner{right:auto;left:max(16px, calc((100vw - 480px)/2 + 16px))}
 <div class="overlay" id="ov"><div class="sheet" id="sheet" role="dialog" aria-modal="true"></div></div>
 
 <script>
-/* ===== Sync setup (step 2): paste your Firebase config and a long random room id ===== */
+/* ===== Sync setup (step 2): paste your Firebase config here ===== */
 const FIREBASE_CONFIG = null;   // e.g. {apiKey:"...", authDomain:"...", projectId:"...", appId:"..."}
-const ROOM_ID = "";             // e.g. "mikey-euni-7f3k9q2x..." (keep it secret)
-/* ================================================================================ */
+/* The room id is never written in this file (the repo is public). Open the app once per phone
+   with ...github.io/us-habits/#room=<id>; it is remembered on that phone. Keep the #room part in
+   the address when adding to the Home Screen, since the Home Screen app has its own storage. */
+const LS_ROOM = "us-habits-room";
+const ROOM_ID = (()=>{
+  const ok = s => /^[A-Za-z0-9_-]{16,128}$/.test(s||"") ? s : "";
+  let r = "";
+  try{ r = ok(decodeURIComponent((location.hash.match(/[#&]room=([^&]*)/)||[])[1]||"")); }catch(e){}
+  try{ if(r) localStorage.setItem(LS_ROOM,r); else r = ok(localStorage.getItem(LS_ROOM)); }catch(e){}
+  return r;
+})();
+/* ================================================================ */
 
 const PEOPLE = [
   {id:"euni",  name:"Euni",  color:"var(--euni)"},
@@ -551,6 +561,7 @@ function streak(h,p){
 
 /* ---------- storage backends ---------- */
 let backend;
+const syncing = () => backend===remote;
 const local = {
   init(){ try{ const s=JSON.parse(localStorage.getItem(LS_DATA)||"null"); if(s){ state.habits=s.habits||{}; state.checks=s.checks||{}; state.todos=s.todos||{}; } }catch(e){} render(); },
   save(){ try{ localStorage.setItem(LS_DATA, JSON.stringify({habits:state.habits,checks:state.checks,todos:state.todos})); }catch(e){} },
@@ -651,7 +662,7 @@ function render(){
   document.querySelectorAll(".wk").forEach(b=>b.style.display = state.tab==="week" ? "" : "none");
   $("dayHead").style.display = state.tab==="week" && Object.keys(state.habits).length ? "" : "none";
   document.querySelectorAll("[data-tab]").forEach(b=>b.setAttribute("aria-pressed", b.dataset.tab===state.tab));
-  $("banner").innerHTML = FIREBASE_CONFIG ? "" : `<div class="banner">Preview: saved on this phone only</div>`;
+  $("banner").innerHTML = syncing() ? "" : `<div class="banner">${FIREBASE_CONFIG&&!ROOM_ID?"Not connected: open your private link once on this phone":"Preview: saved on this phone only"}</div>`;
   const hs=Object.values(state.habits).sort((x,y)=>(x.order||0)-(y.order||0));
   if(!hs.length) $("list").innerHTML=`<div class="empty">No habits yet.<br>Tap <b>+</b> to add one you’ll do together.</div>`;
   else $("list").innerHTML = state.tab==="week" ? weekHTML(hs) : state.tab==="log" ? logHTML(hs) : todayHTML(hs);
@@ -862,9 +873,9 @@ function menuForm(){
     <div class="seg" style="margin-top:8px"><button data-hand="left" aria-pressed="${handPref()==="left"}">✋ Left hand</button><button data-hand="right" aria-pressed="${handPref()==="right"}">Right hand 🤚</button></div>
     <label class="f">Appearance</label>
     <div class="seg" style="margin-top:8px">${[["auto","Auto"],["light","Light"],["dark","Dark"]].map(([v,n])=>`<button data-th="${v}" aria-pressed="${themePref()===v}">${n}</button>`).join("")}</div>
-    <p class="sstats">${FIREBASE_CONFIG?"Syncing is on.":"Preview mode: data stays on this device until syncing is set up."}</p>
+    <p class="sstats">${syncing()?"Syncing is on.":FIREBASE_CONFIG&&!ROOM_ID?"Not connected: open your private link (ending in #room=…) once on this phone.":"Preview mode: data stays on this device until syncing is set up."}</p>
     <label class="f">Backup</label><div class="footer" style="margin-top:8px"><button class="btn" data-act="export">Download a backup</button></div>
-    ${FIREBASE_CONFIG?"":`<label class="f">Try it out</label><div class="footer" style="margin-top:8px"><button class="btn" data-act="simfill">Simulate ${esc(otherP().name)}’s check-ins</button></div><div class="footer" style="margin-top:8px"><button class="btn" data-act="simclear">Clear simulated data</button></div>`}`);
+    ${syncing()?"":`<label class="f">Try it out</label><div class="footer" style="margin-top:8px"><button class="btn" data-act="simfill">Simulate ${esc(otherP().name)}’s check-ins</button></div><div class="footer" style="margin-top:8px"><button class="btn" data-act="simclear">Clear simulated data</button></div>`}`);
 }
 
 function addTodo(){

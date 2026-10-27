@@ -5,11 +5,12 @@ A small, free web app for two people to track the same habits together on iPhone
 - **Preview (design testing, data saved per device):** https://claude.ai/artifact/8W4XBqFzxXNxmBsrxnVN1a
 - **App file:** `index.html` (single file: HTML + CSS + JS, no build step)
 - **Hosting:** GitHub Pages from `main` (root). Repo: https://github.com/eunicecho0725/us-habits — live app: https://eunicecho0725.github.io/us-habits/ (possibly Vercel later). Publish updates with `git commit` + `git push`; GitHub CLI is at `~/.local/bin/gh`.
-- **Sync:** Firebase Firestore (free plan), compat SDK 10.12.2 loaded from gstatic only when `FIREBASE_CONFIG` and `ROOM_ID` are set at the top of the script. Without them, the app runs in preview mode with localStorage.
+- **Sync:** Firebase Firestore (free plan), compat SDK 10.12.2 loaded from gstatic only when `FIREBASE_CONFIG` is set at the top of the script **and** the phone has a room ID. Without them, the app runs in preview mode with localStorage.
+- **Room ID (secret, never in the repo):** the repo and site are public, so the room ID is not in `index.html`. Each phone opens the private link `https://eunicecho0725.github.io/us-habits/#room=<id>` once; the app saves it in localStorage (`us-habits-room`). Add to Home Screen *from that link* (with `#room=` still in the address), because the Home Screen app has its own storage. The `#…` part is never sent to GitHub's servers. ID must be 16–128 chars of `A-Z a-z 0-9 _ -`.
 
 ## Status
 - Design is in active iteration.
-- Firebase is **not set up yet**. Next step: create project (Firestore in europe-west6, production mode), publish rules scoped to the room ID, paste `firebaseConfig` + `ROOM_ID` into `index.html`, upload to GitHub, enable Pages, add to both phones.
+- Firebase is **not set up yet**. Next step: create project (Firestore in europe-west6, production mode), generate a long random room ID (keep it only in the Firebase rules and the private link), publish the rules below, paste `firebaseConfig` into `index.html`, push, then open the private link on both phones and add to Home Screen. GitHub repo and Pages are done.
 
 Firestore rules:
 ```
@@ -54,5 +55,6 @@ service cloud.firestore {
 ## Working agreements
 - Test design changes in the preview link first, then produce an updated `index.html` for GitHub.
 - Keep data compatible with the model above; warn before any change that alters stored data and suggest downloading a backup first.
-- Always keep the real `FIREBASE_CONFIG` and `ROOM_ID` in place once set.
+- Always keep the real `FIREBASE_CONFIG` in place once set (it is safe to be public).
+- Never write the real room ID into `index.html`, `CLAUDE.md`, commits, or any file in this folder.
 - Check new UI in light and dark mode at iPhone width (~390 px), in both hand modes.
