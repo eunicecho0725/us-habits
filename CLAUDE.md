@@ -4,7 +4,7 @@ A small, free web app for two people to track the same habits together on iPhone
 
 - **Preview (design testing, data saved per device):** https://claude.ai/artifact/8W4XBqFzxXNxmBsrxnVN1a
 - **App file:** `index.html` (single file: HTML + CSS + JS, no build step)
-- **Hosting plan:** GitHub Pages (public repo `us-habits`), possibly Vercel later
+- **Hosting:** GitHub Pages from `main` (root). Repo: https://github.com/eunicecho0725/us-habits — live app: https://eunicecho0725.github.io/us-habits/ (possibly Vercel later). Publish updates with `git commit` + `git push`; GitHub CLI is at `~/.local/bin/gh`.
 - **Sync:** Firebase Firestore (free plan), compat SDK 10.12.2 loaded from gstatic only when `FIREBASE_CONFIG` and `ROOM_ID` are set at the top of the script. Without them, the app runs in preview mode with localStorage.
 
 ## Status
