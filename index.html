@@ -463,6 +463,42 @@ body.lefty .trow{flex-direction:row-reverse}
 .delbtn{appearance:none;border:0;background:none;color:var(--danger);cursor:pointer;display:grid;place-items:center;min-width:var(--tap);min-height:var(--tap);margin:-10px -12px -10px 0;padding:0;flex:none}
 .delok{appearance:none;border:0;border-radius:999px;background:var(--danger);color:#fff;font:inherit;font-size:var(--t-subhead);font-weight:600;padding:6px 14px;cursor:pointer;flex:none}
 .tmemos{margin-top:4px;display:flex;flex-direction:column;gap:3px}
+/* Partner's own habits: a faint neutral area below your own habits, deliberately quieter than them.
+   The list gets 10px of side room so the area can bleed past the content edge while circles stay
+   aligned with the pinned day header. */
+.list{margin-inline:-10px;padding-inline:10px}
+.partnergroup{margin:32px -10px 0;padding:10px 10px 0;border-radius:14px;background:rgba(116,116,128,.045)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .partnergroup{background:rgba(118,118,128,.09)}}
+:root[data-theme="dark"] .partnergroup{background:rgba(118,118,128,.09)}
+.partnergroup .trow-wrap:last-child,.partnergroup .card:last-child{border-bottom:0}
+.partnergroup .panel{background:transparent}
+.phdr{display:flex;align-items:center;gap:6px;margin:0 0 2px;font-size:var(--t-caption1);font-weight:400;letter-spacing:0;color:var(--label-2)}
+.phdr .adot{width:5px;height:5px;margin:0;flex:none;opacity:.8}
+.card:has(+ .partnergroup){border-bottom:0}
+.theirs .tname,.theirs .hname{font-size:var(--t-footnote);font-weight:400;letter-spacing:0;color:var(--label-2)}
+.theirs .hemoji{opacity:.5;font-size:.9em}
+.theirs .tmemo{font-size:var(--t-footnote);line-height:18px}
+.theirs .target{font-size:var(--t-caption1);color:var(--label-3)}
+.theirs .circle{background:var(--fill-4)}
+.theirs .circle[style*="background"]{opacity:.45}
+.theirs .streak{opacity:.6;font-size:var(--t-caption2);padding:1px 6px}
+.trow-wrap.theirs{padding:6px 0}
+.partnergroup .trow-wrap.theirs:last-child{padding-bottom:8px}
+.trow-wrap.theirs .trow{min-height:30px}
+.trow-wrap.theirs .cell{width:54px;padding:0}
+.trow-wrap.theirs .circle{width:24px;height:24px;min-height:24px;font-size:var(--t-caption2)}
+.card.theirs{padding:12px 0}
+.card.theirs:first-of-type{padding-top:8px}
+.card.theirs .cardhead{padding-bottom:8px;gap:6px}
+.card.theirs .cell{padding:0}
+.card.theirs .grid .circle{width:46%;min-height:0;font-size:var(--t-caption2)}
+.card.theirs .nbadge{width:6px;height:6px;top:-1px;right:-1px}
+.formbtns .btn{flex:1}
+.formbtns .btn.primary{flex:2}
+.btn.primary:disabled{opacity:.35;cursor:default}
+body.lefty .formbtns{flex-direction:row-reverse}
+.footer.sticky.formbtns{margin-inline:-18px;padding-inline:18px;background:var(--glass-strong);-webkit-backdrop-filter:saturate(180%) blur(30px);backdrop-filter:saturate(180%) blur(30px)}
+.joinlink{appearance:none;border:0;background:none;display:block;color:var(--label-2);font-size:var(--t-footnote);padding:8px 0 2px;cursor:pointer}
 .tmemo{display:flex;align-items:baseline;gap:7px;font-size:var(--t-subhead);line-height:20px;color:var(--label-2)}
 .tmemo .adot{width:7px;height:7px;flex:none;transform:translateY(-1px)}
 .tmemo span{min-width:0;overflow-wrap:anywhere}
@@ -580,6 +616,14 @@ const check = (hid,p,date) => state.checks[ck(hid,p,date)];
 const done = (hid,p,date) => !!(check(hid,p,date)||{}).done;
 const todoItems = (hid,date) => ((state.todos[tk(hid,date)]||{}).items)||[];
 const canDelMemo = it => !it.by || it.by===state.me;
+/* Habit members: no field = shared by both (older habits). ["euni"] = Euni's own habit. */
+const members = h => Array.isArray(h.members)&&h.members.length ? h.members : PEOPLE.map(p=>p.id);
+const isMember = (h,p) => members(h).includes(p);
+const isMine = h => isMember(h,state.me||"euni");
+const doers = (h,d) => PEOPLE.filter(p=>isMember(h,p.id)&&done(h.id,p.id,d));
+const SHOWP_KEY="us-habits-showpartner";
+function showPartner(){ try{ return localStorage.getItem(SHOWP_KEY)!=="0"; }catch(e){ return true; } }
+const visible = h => isMine(h) || showPartner();
 const person = id => PEOPLE.find(p=>p.id===id);
 const esc = s => String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const uid = () => Date.now().toString(36)+Math.random().toString(36).slice(2,6);
@@ -699,10 +743,10 @@ function render(){
   const isCur = weekStart(state.week).getTime()===weekStart(new Date()).getTime();
   document.querySelector(".top .weeknav").style.display = state.tab==="week" && !isCur ? "" : "none";
   document.querySelectorAll(".wk").forEach(b=>b.style.display = state.tab==="week" ? "" : "none");
-  $("dayHead").style.display = state.tab==="week" && Object.keys(state.habits).length ? "" : "none";
+  $("dayHead").style.display = state.tab==="week" && Object.values(state.habits).some(visible) ? "" : "none";
   document.querySelectorAll("[data-tab]").forEach(b=>b.setAttribute("aria-pressed", b.dataset.tab===state.tab));
   $("banner").innerHTML = syncing() ? "" : `<div class="banner">${FIREBASE_CONFIG&&!ROOM_ID?"Not connected: open your private link once on this phone":"Preview: saved on this phone only"}</div>`;
-  const hs=Object.values(state.habits).sort((x,y)=>(x.order||0)-(y.order||0));
+  const hs=Object.values(state.habits).filter(visible).sort((x,y)=>(x.order||0)-(y.order||0));
   if(!hs.length) $("list").innerHTML=`<div class="empty">No habits yet.<br>Tap <b>+</b> to add one you’ll do together.</div>`;
   else $("list").innerHTML = state.tab==="week" ? weekHTML(hs) : state.tab==="log" ? logHTML(hs) : todayHTML(hs);
   let seen=true; try{ seen=localStorage.getItem("us-habits-tip")==="1"; }catch(e){}
@@ -729,33 +773,36 @@ function weekHTML(hs){
   const diff=Math.round((weekStart(state.week)-weekStart(new Date()))/(7*864e5));
   $("weekLabel").textContent = diff===0 ? "" : "↩ Back to this week";
   $("dayHead").innerHTML = days.map(d=>`<div class="dh${d===t?" today":""}">${DOW[parse(d).getDay()]}<b>${parse(d).getDate()}</b></div>`).join("");
-  return hs.map(h=>{
+  const card = h=>{
+    const mine = isMine(h), owner = person(members(h)[0]);
     const cells = days.map(d=>{
-      const who = PEOPLE.filter(p=>done(h.id,p.id,d));
+      const who = doers(h,d);
       const fut = d>t, off = !isSched(h,d);
       const isSel = state.sel && state.sel.h===h.id && state.sel.d===d;
       const isPop = POP && POP.h===h.id && POP.d===d;
       const extra = todoItems(h.id,d).length;
       const label = who.length ? who.map(p=>p.name).join(" and ")+" did it" : (off?"rest day":"not done");
-      return `<div class="cell${d===t?" today":""}"><button class="circle${off&&!who.length?" off":""}${fut?" future":""}${isSel?" sel":""}${isPop?" pop":""}" data-h="${h.id}" data-d="${d}" ${fut?"disabled":""} style="${circleStyle(who)}" aria-label="${d}: ${label}">${circleGlyph(who)}${noteBadge(h.id,d)}</button>${isPop&&who.length===2?`<span class="burst" aria-hidden="true">🎉</span>`:""}</div>`;
+      return `<div class="cell${d===t?" today":""}"><button class="circle${off&&!who.length?" off":""}${fut?" future":""}${isSel?" sel":""}${isPop?" pop":""}" data-h="${h.id}" data-d="${d}" ${fut?"disabled":""} style="${circleStyle(who)}" aria-label="${d}: ${mine?"":"Just "+owner.name+", "}${label}">${circleGlyph(who)}${noteBadge(h.id,d)}</button>${isPop&&who.length===2?`<span class="burst" aria-hidden="true">🎉</span>`:""}</div>`;
     }).join("");
     const tgt = weekTarget(h);
     const counts = PEOPLE.map(p=>{ const c=weekCount(h,p.id,state.week), sum=h.unit?amountSum(h,p.id,state.week):0; return `<span><i style="background:${p.color}"></i>${p.name} <b class="${c>=tgt?"met":""}">${c}/${tgt}</b>${sum?` · ${sum} ${esc(h.unit)}`:""}</span>`; }).join("");
-    const sk=streak(h,state.me||"euni");
+    const sk=streak(h,mine?state.me||"euni":owner.id);
     const dl = sched(h).length===7 ? "Every day" : sched(h).map(i=>DOW[i]).join(" ");
     const showPanel = state.sel && state.sel.h===h.id && days.includes(state.sel.d);
-    return `<div class="card">
-      <div class="cardhead"><span class="hname" data-open="${h.id}" role="button" tabindex="0" aria-expanded="${!!showPanel}">${h.emoji?`<span class="hemoji">${esc(h.emoji)}</span>`:""}${esc(h.name)}${sk?`<span class="streak${sk>=7?" hot":""}" aria-label="${sk} day streak">🔥${sk}</span>`:""}</span><button class="target editbtn" data-edit="${h.id}" aria-label="Edit ${esc(h.name)}">${dl} ›</button></div>
+    return `<div class="card${mine?"":" theirs"}">
+      <div class="cardhead"><span class="hname" data-open="${h.id}" role="button" tabindex="0" aria-expanded="${!!showPanel}">${h.emoji?`<span class="hemoji">${esc(h.emoji)}</span>`:""}${esc(h.name)}${sk?`<span class="streak${sk>=7?" hot":""}" aria-label="${sk} day streak">🔥${sk}</span>`:""}</span>${mine?`<button class="target editbtn" data-edit="${h.id}" aria-label="Edit ${esc(h.name)}">${dl} ›</button>`:`<span class="target">${dl}</span>`}</div>
       <div class="grid">${cells}</div>
       ${showPanel ? panel(h, state.sel.d, `${(days.indexOf(state.sel.d)+0.5)/7*100}%`) : ""}
     </div>`;
-  }).join("");
+  };
+  const mineHs=hs.filter(isMine), theirs=hs.filter(h=>!isMine(h));
+  return mineHs.map(card).join("") + (theirs.length?`<section class="partnergroup" style="--pc:${otherP().color}">${partnerHead(otherP())}${theirs.map(card).join("")}</section>`:"");
 }
 
 function logHTML(hs){
   const byDate={}, add=(d,e)=>(byDate[d]=byDate[d]||[]).push(e);
-  Object.values(state.todos).forEach(t=>{ const h=state.habits[t.habitId]; if(!h) return; (t.items||[]).forEach(it=>add(t.date,{h,by:it.by,text:it.text,done:it.done,d:t.date})); });
-  Object.values(state.checks).forEach(c=>{ const h=state.habits[c.habitId]; if(!h||!c.done||!c.amount) return; add(c.date,{h,by:c.person,text:`${c.amount} ${h.unit||""}`.trim(),amt:true,d:c.date}); });
+  Object.values(state.todos).forEach(t=>{ const h=state.habits[t.habitId]; if(!h||!visible(h)) return; (t.items||[]).forEach(it=>add(t.date,{h,by:it.by,text:it.text,done:it.done,d:t.date})); });
+  Object.values(state.checks).forEach(c=>{ const h=state.habits[c.habitId]; if(!h||!visible(h)||!isMember(h,c.person)||!c.done||!c.amount) return; add(c.date,{h,by:c.person,text:`${c.amount} ${h.unit||""}`.trim(),amt:true,d:c.date}); });
   const dates=Object.keys(byDate).sort().reverse();
   if(!dates.length) return `<div class="empty">Memos you leave on any day will show up here.</div>`;
   const y=ymd(addDays(new Date(),-1));
@@ -764,6 +811,7 @@ function logHTML(hs){
     return `<div class="tgroup"><div class="tglabel" role="heading" aria-level="2"><span>${lbl}</span></div>${byDate[d].map(e=>`<button class="lrow" data-logh="${e.h.id}" data-logd="${e.d}"><i class="adot" style="background:${(person(e.by)||{}).color||"var(--muted)"}"></i><span class="ltext"><span class="lhabit">${e.h.emoji?esc(e.h.emoji)+" ":""}${esc(e.h.name)}</span><span class="lnote${e.done?" done":""}">${e.amt?"Logged ":""}${esc(e.text)}</span></span></button>`).join("")}</div>`;
   }).join("");
 }
+function partnerHead(p){ return `<h2 class="phdr"><i class="adot" style="background:${p.color}"></i>Just ${esc(p.name)}</h2>`; }
 function noteBadge(hid,d){
   const items=todoItems(hid,d); if(!items.length) return "";
   const by=[...new Set(items.map(i=>i.by))].map(person).filter(Boolean);
@@ -776,20 +824,22 @@ function todayHTML(hs){
   const other=PEOPLE.find(p=>p.id!==state.me)||PEOPLE[1];
   const sum = PEOPLE.map(p=>`<span><i style="background:${p.color}"></i>${p.name} <b>${due.filter(h=>done(h.id,p.id,t)).length}/${due.length}</b></span>`).join("");
   const row = h=>{
-    const who=PEOPLE.filter(p=>done(h.id,p.id,t)), mine=check(h.id,state.me,t)||{}, oc=check(h.id,other.id,t)||{};
+    const who=doers(h,t), mine=check(h.id,state.me,t)||{}, oc=check(h.id,other.id,t)||{}, own=isMine(h);
     const isPop=POP&&POP.h===h.id&&POP.d===t, isSel=state.sel&&state.sel.h===h.id&&state.sel.d===t;
     const notes=todoItems(h.id,t).length;
     const meta=[];
     if(mine.done && (mine.amount||mine.feel)) meta.push(`You ${mine.amount?`${mine.amount} ${esc(h.unit||"")}`:""} ${feelE(mine.feel)}`.trim());
     meta.push(`${esc(other.name)} ${oc.done?`✓ ${feelE(oc.feel)}`:"not yet"}`.trim());
     if(notes) meta.push(`📝 ${notes}`);
-    return `<div class="trow-wrap"><div class="trow">
+    return `<div class="trow-wrap${own?"":" theirs"}"><div class="trow">
       <div class="tinfo" data-open="${h.id}" role="button" tabindex="0" aria-expanded="${!!isSel}"><div class="tname">${h.emoji?`<span class="hemoji">${esc(h.emoji)}</span>`:""}${esc(h.name)}</div>${!isSel&&notes?`<div class="tmemos">${todoItems(h.id,t).map(it=>`<div class="tmemo"><i class="adot" style="background:${(person(it.by)||{}).color||"var(--muted)"}"></i><span>${esc(it.text)}</span></div>`).join("")}</div>`:""}</div>
-      <div class="cell"><button class="circle big${isSel?" sel":""}${isPop?" pop":""}" data-h="${h.id}" data-d="${t}" style="${circleStyle(who)}" aria-label="${esc(h.name)}${who.length?": "+who.map(p=>p.name).join(" and ")+" did it":""}">${circleGlyph(who)}</button>${isPop&&who.length===2?`<span class="burst" aria-hidden="true">🎉</span>`:""}</div>
+      <div class="cell"><button class="circle${own?" big":""}${isSel?" sel":""}${isPop?" pop":""}" data-h="${h.id}" data-d="${t}" style="${circleStyle(who)}" aria-label="${own?"":"Just "+esc(other.name)+": "}${esc(h.name)}${who.length?": "+who.map(p=>p.name).join(" and ")+" did it":""}">${circleGlyph(who)}</button>${isPop&&who.length===2?`<span class="burst" aria-hidden="true">🎉</span>`:""}</div>
     </div>${isSel?panel(h,t,handPref()==="left"?"28px":"calc(100% - 28px)"):""}</div>`;
   };
-  const groups = TODS.map(g=>{ const items=due.filter(h=>(h.tod||"anytime")===g.id); return items.length?`<div class="tgroup"><div class="tglabel" role="heading" aria-level="2"><span>${g.n}</span></div>${items.map(row).join("")}</div>`:""; }).join("");
-  return `${due.length?groups:`<div class="empty">Nothing scheduled today 🌿</div>`}`;
+  const myDue=due.filter(isMine), theirDue=due.filter(h=>!isMine(h));
+  const groups = TODS.map(g=>{ const items=myDue.filter(h=>(h.tod||"anytime")===g.id); return items.length?`<div class="tgroup"><div class="tglabel" role="heading" aria-level="2"><span>${g.n}</span></div>${items.map(row).join("")}</div>`:""; }).join("");
+  const theirs = theirDue.length?`<section class="partnergroup" style="--pc:${other.color}">${partnerHead(other)}${theirDue.map(row).join("")}</section>`:"";
+  return `${myDue.length?groups:`<div class="empty">Nothing scheduled today 🌿</div>`}${theirs}`;
 }
 
 function panel(h,d,xpos){
@@ -808,6 +858,7 @@ function panel(h,d,xpos){
     ${state.adding
       ? `<div class="addtodo"><input type="text" id="todoIn" maxlength="120" placeholder="Write a memo…" enterkeyhint="done"><button data-act="addtodo">Save</button></div>`
       : `<button class="addlink" data-act="startadd">+ Add a memo</button>`}
+    ${isMine(h)?"":`<button class="joinlink" data-join="${h.id}">Join this habit</button>`}
   </div>`;
 }
 
@@ -842,21 +893,30 @@ function habitForm(h){
     <label class="f">Which days?</label>
     <div class="presets"><button data-preset="all">Every day</button><button data-preset="weekdays">Weekdays</button><button data-preset="weekends">Weekends</button><button data-preset="none">Clear</button></div>
     <div class="dpills">${DAYN.map((n,i)=>`<button class="dpill" data-dp="${i}" aria-pressed="${days.includes(i)}">${n[0]}${n[1]}</button>`).join("")}</div>
+    <label class="f">Who’s doing this?</label>
+    <div class="seg" style="margin-top:8px"><button data-mem="both" aria-pressed="${members(h).length>1}">Both of us</button><button data-mem="me" aria-pressed="${members(h).length===1}">Just me</button></div>
     <label class="f">When?</label>
     <div class="seg tods" style="margin-top:8px">${TODS.map(g=>`<button data-tod="${g.id}" aria-pressed="${(h.tod||"anytime")===g.id}">${g.e}<br><small>${g.n}</small></button>`).join("")}</div>
     <details class="more"${moreOpen?" open":""}><summary>More options</summary>
       <label class="f">Track an amount <span class="opt">(optional)</span><input type="text" id="fUnit" maxlength="16" value="${esc(h.unit||"")}" placeholder="e.g. pages, minutes, km"></label>
       <label class="f">Start date<input type="date" id="fStart" value="${esc(h.start||h.created||today())}"></label>
     </details>
-    <div class="footer sticky"><button class="btn primary big" data-act="save">${isNew?"Add habit":"Save changes"}</button></div>
+    <div class="footer sticky formbtns"><button class="btn big" data-act="close">Cancel</button><button class="btn primary big" data-act="save" id="fSave">${isNew?"Add habit":"Save changes"}</button></div>
     ${isNew?"":`<button class="linkdanger" data-act="del">Delete habit</button>`}
   `,"form");
+  updateSave();
   setTimeout(()=>{ const f=$("fName"); if(isNew && f) f.focus(); },50);
+}
+/* The save button is enabled only once the habit has a name and at least one day. */
+function updateSave(){
+  const b=$("fSave"), n=$("fName"); if(!b||!n) return;
+  b.disabled = !n.value.trim() || !document.querySelector('.dpill[aria-pressed="true"]');
 }
 function applyTemplate(t){
   $("fName").value=t.n; setEmoji(t.e,true); emojiManual=true;
   document.querySelectorAll("[data-tod]").forEach(b=>b.setAttribute("aria-pressed", b.dataset.tod===t.t));
   $("fUnit").value=t.u; if(t.u) document.querySelector(".more").open=true;
+  updateSave();
 }
 function autoEmoji(name){
   if(emojiManual) return;
@@ -908,6 +968,8 @@ function menuForm(){
     <div class="seg" style="margin-top:8px">${PEOPLE.map(p=>`<button data-me="${p.id}" aria-pressed="${p.id===state.me}">${p.name}</button>`).join("")}</div>
     <label class="f">Check with</label>
     <div class="seg" style="margin-top:8px"><button data-hand="left" aria-pressed="${handPref()==="left"}">✋ Left hand</button><button data-hand="right" aria-pressed="${handPref()==="right"}">Right hand 🤚</button></div>
+    <label class="f">Habits just for ${esc(otherP().name)}</label>
+    <div class="seg" style="margin-top:8px"><button data-showp="1" aria-pressed="${showPartner()}">Show</button><button data-showp="0" aria-pressed="${!showPartner()}">Hide</button></div>
     <label class="f">Appearance</label>
     <div class="seg" style="margin-top:8px">${[["auto","Auto"],["light","Light"],["dark","Dark"]].map(([v,n])=>`<button data-th="${v}" aria-pressed="${themePref()===v}">${n}</button>`).join("")}</div>
     <p class="sstats">${syncing()?"Syncing is on.":FIREBASE_CONFIG&&!ROOM_ID?"Not connected: open your private link (ending in #room=…) once on this phone.":"Preview mode: data stays on this device until syncing is set up."}</p>
@@ -930,7 +992,7 @@ function simulate(){
   const notes=["Felt great today!","Did it before work","Short one today","Let’s do this together tomorrow"];
   Object.values(state.habits).forEach(h=>{
     days.forEach(d=>{
-      if(d>t||!isSched(h,d)||!started(h,d)) return;
+      if(d>t||!isSched(h,d)||!started(h,d)||!isMember(h,o.id)) return;
       if(d!==t && Math.random()<0.3) return;
       state.checks[ck(h.id,o.id,d)]={habitId:h.id,person:o.id,date:d,done:true,memo:"",feel:FEELS[Math.floor(Math.random()*3)].id,amount:h.unit?Math.ceil(Math.random()*30):null,sample:true};
     });
@@ -986,7 +1048,9 @@ document.addEventListener("click",e=>{
   if(t.classList.contains("circle")){
     if(suppressClick){ suppressClick=false; return; }
     if(!state.me){ whoForm(); return; }
-    const {h,d}=t.dataset, now=!done(h,state.me,d);
+    const {h,d}=t.dataset;
+    if(state.habits[h] && !isMine(state.habits[h])){ state.sel={h,d}; state.adding=false; render(); return; }
+    const now=!done(h,state.me,d);
     if(now) state.pop={h,d};
     setDone(h,state.me,d,now);
     if(now) showDetailsToast(h,d);
@@ -999,6 +1063,9 @@ document.addEventListener("click",e=>{
   if(t.dataset.td && state.sel){ const it=todoItems(state.sel.h,state.sel.d).find(i=>i.id===t.dataset.td); if(it&&canDelMemo(it)){ state.confirmDel=it.id; render(); } return; }
   if(t.dataset.tdok && state.sel){ const {h,d}=state.sel, it=todoItems(h,d).find(i=>i.id===t.dataset.tdok); state.confirmDel=null; if(!it||!canDelMemo(it)){ render(); return; }
     if(backend.removeMemo) backend.removeMemo(h,d,it); else saveTodos(h,d,todoItems(h,d).filter(i=>i.id!==it.id)); return; }
+  if(t.dataset.join){ const h=state.habits[t.dataset.join]; if(h&&state.me&&!isMine(h)) backend.setHabit({...h,members:[...new Set([...members(h),state.me])]}); return; }
+  if(t.dataset.mem){ document.querySelectorAll("[data-mem]").forEach(b=>b.setAttribute("aria-pressed", b===t)); return; }
+  if(t.dataset.showp){ try{ localStorage.setItem(SHOWP_KEY,t.dataset.showp); }catch(err){} document.querySelectorAll("[data-showp]").forEach(b=>b.setAttribute("aria-pressed", b===t)); if(state.sel&&state.habits[state.sel.h]&&!visible(state.habits[state.sel.h])) state.sel=null; render(); return; }
   if(t.dataset.hand){ try{ localStorage.setItem(HAND_KEY,t.dataset.hand); }catch(err){} document.querySelectorAll("[data-hand]").forEach(b=>b.setAttribute("aria-pressed", b===t)); render(); return; }
   if(t.dataset.th){ try{ localStorage.setItem(THEME_KEY,t.dataset.th); }catch(err){} document.querySelectorAll("[data-th]").forEach(b=>b.setAttribute("aria-pressed", b===t)); applyPrefs(); return; }
   if(t.dataset.logh){ state.tab="week"; state.week=weekStart(parse(t.dataset.logd)); state.sel={h:t.dataset.logh,d:t.dataset.logd}; state.adding=false; render(); return; }
@@ -1007,8 +1074,8 @@ document.addEventListener("click",e=>{
   if(t.dataset.feel && state.sel){ const {h,d}=state.sel, cur=check(h,state.me,d)||{}; state.pop={...state.sel}; setField(h,state.me,d,"feel",cur.feel===t.dataset.feel?null:t.dataset.feel); return; }
   if(t.dataset.emoji!==undefined){ emojiManual=true; setEmoji(t.dataset.emoji,true); return; }
   if(t.dataset.tpl!==undefined){ applyTemplate(TEMPLATES[+t.dataset.tpl]); return; }
-  if(t.dataset.preset){ const sets={all:[0,1,2,3,4,5,6],weekdays:[1,2,3,4,5],weekends:[0,6],none:[]}; document.querySelectorAll(".dpill").forEach(b=>b.setAttribute("aria-pressed", sets[t.dataset.preset].includes(+b.dataset.dp))); return; }
-  if(t.dataset.dp!==undefined){ t.setAttribute("aria-pressed", t.getAttribute("aria-pressed")!=="true"); return; }
+  if(t.dataset.preset){ const sets={all:[0,1,2,3,4,5,6],weekdays:[1,2,3,4,5],weekends:[0,6],none:[]}; document.querySelectorAll(".dpill").forEach(b=>b.setAttribute("aria-pressed", sets[t.dataset.preset].includes(+b.dataset.dp))); updateSave(); return; }
+  if(t.dataset.dp!==undefined){ t.setAttribute("aria-pressed", t.getAttribute("aria-pressed")!=="true"); updateSave(); return; }
   if(t.dataset.me){ state.me=t.dataset.me; try{localStorage.setItem(LS_ME,state.me);}catch(err){} closeSheet(); render(); return; }
   const act=t.dataset.act;
   if(act==="close") closeSheet();
@@ -1022,14 +1089,16 @@ document.addEventListener("click",e=>{
   else if(act==="addtodo") addTodo();
   else if(act==="del"){ const h=state.habits[state.editing]; if(h && confirm(`Delete “${h.name}” and all its check-ins?`)){ closeSheet(); if(state.sel&&state.sel.h===h.id) state.sel=null; backend.deleteHabit(h.id); } }
   else if(act==="save"){
+    if(t.disabled) return;
     const name=$("fName").value.trim(); if(!name){ $("fName").focus(); return; }
     const id=state.editing || ("h"+uid());
     const prev=state.habits[id]||{};
     const days=[...document.querySelectorAll(".dpill")].filter(b=>b.getAttribute("aria-pressed")==="true").map(b=>+b.dataset.dp);
-    if(!days.length){ alert("Pick at least one day."); return; }
+    if(!days.length) return;
     const {target, ...keep}=prev;
     const todB=document.querySelector('[data-tod][aria-pressed="true"]');
-    backend.setHabit({...keep,id,name,emoji:$("fEmoji").value.trim(),days,tod:todB?todB.dataset.tod:"anytime",unit:$("fUnit").value.trim(),start:$("fStart").value||today(),
+    const solo=!!document.querySelector('[data-mem="me"][aria-pressed="true"]');
+    backend.setHabit({...keep,id,name,members:solo?[state.me||"euni"]:PEOPLE.map(p=>p.id),emoji:$("fEmoji").value.trim(),days,tod:todB?todB.dataset.tod:"anytime",unit:$("fUnit").value.trim(),start:$("fStart").value||today(),
       created:prev.created||today(),order:prev.order||Date.now()});
     closeSheet();
   }
@@ -1043,7 +1112,7 @@ document.addEventListener("focusout",e=>{
   if(e.target.id==="todoIn" && !e.target.value.trim()){ setTimeout(()=>{ if(document.activeElement && document.activeElement.dataset && document.activeElement.dataset.act==="addtodo") return; state.adding=false; render(); },120); return; }
   setTimeout(()=>{ if(deferred) render(); },0);
 });
-document.addEventListener("input",e=>{ if(e.target.id==="fName"){ autoEmoji(e.target.value); return; } if(e.target.id==="eSearch"){ const r=searchEmoji(e.target.value); $("eGrid").innerHTML = r.length ? emojiButtons(r,$("fEmoji").value) : `<span class="enone">No matches. Try another word.</span>`; return; } if(e.target.tagName==="TEXTAREA"){ e.target.style.height="auto"; e.target.style.height=e.target.scrollHeight+"px"; } });
+document.addEventListener("input",e=>{ if(e.target.id==="fName"){ autoEmoji(e.target.value); updateSave(); return; } if(e.target.id==="eSearch"){ const r=searchEmoji(e.target.value); $("eGrid").innerHTML = r.length ? emojiButtons(r,$("fEmoji").value) : `<span class="enone">No matches. Try another word.</span>`; return; } if(e.target.tagName==="TEXTAREA"){ e.target.style.height="auto"; e.target.style.height=e.target.scrollHeight+"px"; } });
 
 /* ---------- long press: open the day's dropdown ---------- */
 let lpTimer=null, suppressClick=false;
